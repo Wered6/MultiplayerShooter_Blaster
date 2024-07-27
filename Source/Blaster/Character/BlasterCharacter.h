@@ -3,9 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "InputActionValue.h"
 #include "GameFramework/Character.h"
 #include "BlasterCharacter.generated.h"
 
+class UInputAction;
+class UInputMappingContext;
+struct FInputActionValue;
 class UCameraComponent;
 class USpringArmComponent;
 
@@ -20,15 +24,10 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	void MoveForward(float Value);
-	void MoveRight(float Value);
-	void Turn(float Value);
-	void LookUp(float Value);
-
 public:
 	virtual void Tick(float DeltaTime) override;
 
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+#pragma region Camera
 
 private:
 	UPROPERTY(VisibleAnywhere, Category=Camera)
@@ -36,4 +35,37 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category=Camera)
 	TObjectPtr<UCameraComponent> FollowCamera;
+
+#pragma endregion
+
+#pragma region Input
+
+public:
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+protected:
+	/** Called for movement input */
+	void Move(const FInputActionValue& Value);
+
+	/** Called for looking input */
+	void Look(const FInputActionValue& Value);
+
+private:
+	/** MappingContext */
+	UPROPERTY(EditDefaultsOnly, Category=Input)
+	TObjectPtr<UInputMappingContext> DefaultMappingContext;
+
+	/** Jump Input Action */
+	UPROPERTY(EditDefaultsOnly, Category=Input)
+	TObjectPtr<UInputAction> JumpAction;
+
+	/** Move Input Action */
+	UPROPERTY(EditDefaultsOnly, Category=Input)
+	TObjectPtr<UInputAction> MoveAction;
+
+	/** Look Input Action */
+	UPROPERTY(EditDefaultsOnly, Category=Input)
+	TObjectPtr<UInputAction> LookAction;
+
+#pragma endregion
 };

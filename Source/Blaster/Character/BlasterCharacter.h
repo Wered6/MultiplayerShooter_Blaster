@@ -7,6 +7,7 @@
 #include "GameFramework/Character.h"
 #include "BlasterCharacter.generated.h"
 
+class UWidgetComponent;
 class UInputAction;
 class UInputMappingContext;
 struct FInputActionValue;
@@ -66,6 +67,14 @@ private:
 	/** Look Input Action */
 	UPROPERTY(EditDefaultsOnly, Category=Input)
 	TObjectPtr<UInputAction> LookAction;
+
+#pragma endregion
+
+#pragma region HUD
+
+private:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess="true"), Category=HUD)
+	TObjectPtr<UWidgetComponent> OverheadWidget;
 
 #pragma endregion
 };

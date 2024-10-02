@@ -26,6 +26,9 @@ public:
 	friend class ABlasterCharacter;
 	void EquipWeapon(AWeapon* WeaponToEquip);
 
+protected:
+	void SetAiming(const bool bIsAiming);
+
 private:
 	TObjectPtr<ABlasterCharacter> Character;
 
@@ -34,9 +37,16 @@ private:
 public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+protected:
+	UFUNCTION(Server, Reliable)
+	void ServerSetAiming(const bool bIsAiming);
+
 private:
 	UPROPERTY(Replicated)
 	TObjectPtr<AWeapon> EquippedWeapon;
+
+	UPROPERTY(Replicated)
+	bool bAiming;
 
 #pragma endregion
 };

@@ -59,6 +59,10 @@ protected:
 	/** Called for crouch input */
 	void Crouch();
 
+	/** Called for aim input */
+	void AimButtonPressed();
+	void AimButtonReleased();
+
 private:
 	/** MappingContext */
 	UPROPERTY(EditDefaultsOnly, Category=Input)
@@ -76,11 +80,17 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category=Input)
 	TObjectPtr<UInputAction> LookAction;
 
+	/** Equip Input Action */
 	UPROPERTY(EditDefaultsOnly, Category=Input)
 	TObjectPtr<UInputAction> EquipAction;
 
+	/** Crouch Input Action */
 	UPROPERTY(EditDefaultsOnly, Category=Input)
 	TObjectPtr<UInputAction> CrouchAction;
+
+	/** Aim Input Action */
+	UPROPERTY(EditDefaultsOnly, Category=Input)
+	TObjectPtr<UInputAction> AimAction;
 
 #pragma endregion
 
@@ -125,4 +135,5 @@ private:
 
 public:
 	bool IsWeaponEquipped() const;
+	bool IsAiming() const;
 };

@@ -81,6 +81,11 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		UE_LOG(LogTemp, Warning, TEXT("%s|CrouchAction is nullptr"), *FString(__FUNCTION__))
 		return;
 	}
+	if (!AimAction)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|AimAction is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
 #pragma endregion
 
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -136,6 +141,10 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 	// Crouch
 	EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &ABlasterCharacter::Crouch);
+
+	// Aim
+	EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &ABlasterCharacter::AimButtonPressed);
+	EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &ABlasterCharacter::AimButtonReleased);
 }
 
 void ABlasterCharacter::Move(const FInputActionValue& Value)
@@ -209,6 +218,32 @@ void ABlasterCharacter::Crouch()
 	bIsCrouched ? ACharacter::UnCrouch() : ACharacter::Crouch();
 }
 
+void ABlasterCharacter::AimButtonPressed()
+{
+#pragma region Nullchecks
+	if (!Combat)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|Combat is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+#pragma endregion
+
+	Combat->SetAiming(true);
+}
+
+void ABlasterCharacter::AimButtonReleased()
+{
+#pragma region Nullchecks
+	if (!Combat)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|Combat is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+#pragma endregion
+
+	Combat->SetAiming(false);
+}
+
 void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -277,4 +312,9 @@ void ABlasterCharacter::ServerEquip_Implementation()
 bool ABlasterCharacter::IsWeaponEquipped() const
 {
 	return Combat && Combat->EquippedWeapon;
+}
+
+bool ABlasterCharacter::IsAiming() const
+{
+	return Combat && Combat->bAiming;
 }

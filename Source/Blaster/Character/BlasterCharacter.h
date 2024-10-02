@@ -116,4 +116,7 @@ private:
 private:
 	UFUNCTION(Server, Reliable)
 	void ServerEquip();
+
+public:
+	bool IsWeaponEquipped() const;
 };

@@ -258,3 +258,8 @@ void ABlasterCharacter::ServerEquip_Implementation()
 
 	Combat->EquipWeapon(OverlappingWeapon);
 }
+
+bool ABlasterCharacter::IsWeaponEquipped() const
+{
+	return Combat && Combat->EquippedWeapon;
+}

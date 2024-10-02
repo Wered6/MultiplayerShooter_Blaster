@@ -28,5 +28,15 @@ public:
 
 private:
 	TObjectPtr<ABlasterCharacter> Character;
+
+#pragma region Replication
+
+public:
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+private:
+	UPROPERTY(Replicated)
 	TObjectPtr<AWeapon> EquippedWeapon;
+
+#pragma endregion
 };

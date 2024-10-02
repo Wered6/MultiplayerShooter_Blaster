@@ -44,13 +44,14 @@ void AWeapon::BeginPlay()
 		return;
 	}
 #pragma endregion
-	
+
 	// only server
 	if (HasAuthority())
 	{
 		AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		AreaSphere->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 		AreaSphere->OnComponentBeginOverlap.AddDynamic(this, &AWeapon::OnSphereOverlap);
+		AreaSphere->OnComponentEndOverlap.AddDynamic(this, &AWeapon::OnSphereEndOverlap);
 	}
 	PickupWidget->SetVisibility(false);
 }
@@ -60,6 +61,20 @@ void AWeapon::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
+void AWeapon::ShowPickupWidget(const bool bShowWidget) const
+{
+#pragma region Nullchecks
+	if (!PickupWidget)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|PickupWidget is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+#pragma endregion
+
+	PickupWidget->SetVisibility(bShowWidget);
+}
+
+// Gets called only on server
 void AWeapon::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent,
                               AActor* OtherActor,
                               UPrimitiveComponent* OtherComp,
@@ -70,14 +85,18 @@ void AWeapon::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent,
 	ABlasterCharacter* BlasterCharacter{Cast<ABlasterCharacter>(OtherActor)};
 	if (BlasterCharacter)
 	{
-#pragma region Nullchecks
-		if (!PickupWidget)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("%s|PickupWidget is nullptr"), *FString(__FUNCTION__))
-			return;
-		}
-#pragma endregion
+		BlasterCharacter->SetOverlappingWeapon(this);
+	}
+}
 
-		PickupWidget->SetVisibility(true);
+void AWeapon::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent,
+                                 AActor* OtherActor,
+                                 UPrimitiveComponent* OtherComp,
+                                 int32 OtherBodyIndex)
+{
+	ABlasterCharacter* BlasterCharacter{Cast<ABlasterCharacter>(OtherActor)};
+	if (BlasterCharacter)
+	{
+		BlasterCharacter->SetOverlappingWeapon(nullptr);
 	}
 }

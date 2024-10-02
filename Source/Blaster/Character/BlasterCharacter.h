@@ -7,6 +7,7 @@
 #include "GameFramework/Character.h"
 #include "BlasterCharacter.generated.h"
 
+class AWeapon;
 class UWidgetComponent;
 class UInputAction;
 class UInputMappingContext;
@@ -75,6 +76,22 @@ private:
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess="true"), Category=HUD)
 	TObjectPtr<UWidgetComponent> OverheadWidget;
+
+#pragma endregion
+
+#pragma region Replication
+
+public:
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	void SetOverlappingWeapon(AWeapon* Weapon);
+
+private:
+	UFUNCTION()
+	void OnRep_OverlappingWeapon(AWeapon* LastWeapon);
+	
+	UPROPERTY(ReplicatedUsing=OnRep_OverlappingWeapon)
+	TObjectPtr<AWeapon> OverlappingWeapon;
 
 #pragma endregion
 };

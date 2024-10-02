@@ -2,7 +2,6 @@
 
 
 #include "Weapon.h"
-
 #include "Blaster/Character/BlasterCharacter.h"
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
@@ -89,6 +88,7 @@ void AWeapon::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent,
 	}
 }
 
+// ReSharper disable once CppMemberFunctionMayBeConst
 void AWeapon::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent,
                                  AActor* OtherActor,
                                  UPrimitiveComponent* OtherComp,

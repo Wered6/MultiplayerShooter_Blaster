@@ -7,6 +7,7 @@
 #include "GameFramework/Character.h"
 #include "BlasterCharacter.generated.h"
 
+class UCombatComponent;
 class AWeapon;
 class UWidgetComponent;
 class UInputAction;
@@ -52,6 +53,9 @@ protected:
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
 
+	/** Called for equip input */
+	void Equip();
+
 private:
 	/** MappingContext */
 	UPROPERTY(EditDefaultsOnly, Category=Input)
@@ -68,6 +72,9 @@ private:
 	/** Look Input Action */
 	UPROPERTY(EditDefaultsOnly, Category=Input)
 	TObjectPtr<UInputAction> LookAction;
+
+	UPROPERTY(EditDefaultsOnly, Category=Input)
+	TObjectPtr<UInputAction> EquipAction;
 
 #pragma endregion
 
@@ -89,9 +96,20 @@ public:
 private:
 	UFUNCTION()
 	void OnRep_OverlappingWeapon(AWeapon* LastWeapon);
-	
+
 	UPROPERTY(ReplicatedUsing=OnRep_OverlappingWeapon)
 	TObjectPtr<AWeapon> OverlappingWeapon;
+
+#pragma endregion
+
+#pragma region Components
+
+public:
+	virtual void PostInitializeComponents() override;
+
+private:
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UCombatComponent> Combat;
 
 #pragma endregion
 };

@@ -15,6 +15,7 @@ enum class EWeaponState : uint8
 	EWS_Initial UMETA(DisplayName = "Initial State"),
 	EWS_Equipped UMETA(DisplayName = "Equipped"),
 	EWS_Dropped UMETA(DisplayName = "Dropped"),
+
 	EWS_Max UMETA(DisplayName = "DefaultMax")
 };
 
@@ -34,22 +35,12 @@ public:
 
 #pragma region Weapon Properties
 
-private:
-	UPROPERTY(VisibleAnywhere, Category="Weapon Properties")
-	TObjectPtr<USkeletalMeshComponent> WeaponMesh;
-
-	UPROPERTY(VisibleAnywhere, Category="Weapon Properties")
-	TObjectPtr<USphereComponent> AreaSphere;
-
-	UPROPERTY(VisibleAnywhere, Category="Weapon Properties")
-	EWeaponState WeaponState;
-
-	UPROPERTY(VisibleAnywhere, Category="Weapon Properties")
-	TObjectPtr<UWidgetComponent> PickupWidget;
-
-#pragma endregion
-
 public:
+	FORCEINLINE void SetWeaponState(const EWeaponState State)
+	{
+		WeaponState = State;
+	}
+
 	void ShowPickupWidget(const bool bShowWidget) const;
 
 protected:
@@ -66,4 +57,19 @@ protected:
 	                        AActor* OtherActor,
 	                        UPrimitiveComponent* OtherComp,
 	                        int32 OtherBodyIndex);
+
+private:
+	UPROPERTY(VisibleAnywhere, Category="Weapon Properties")
+	TObjectPtr<USkeletalMeshComponent> WeaponMesh;
+
+	UPROPERTY(VisibleAnywhere, Category="Weapon Properties")
+	TObjectPtr<USphereComponent> AreaSphere;
+
+	UPROPERTY(VisibleAnywhere, Category="Weapon Properties")
+	EWeaponState WeaponState;
+
+	UPROPERTY(VisibleAnywhere, Category="Weapon Properties")
+	TObjectPtr<UWidgetComponent> PickupWidget;
+
+#pragma endregion
 };

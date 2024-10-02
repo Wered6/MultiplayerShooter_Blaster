@@ -4,6 +4,7 @@
 #include "BlasterCharacter.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Blaster/BlasterComponents/CombatComponent.h"
 #include "Blaster/Weapon/Weapon.h"
 #include "Camera/CameraComponent.h"
 #include "Components/WidgetComponent.h"
@@ -30,6 +31,9 @@ ABlasterCharacter::ABlasterCharacter()
 
 	OverheadWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("OverheadWidget"));
 	OverheadWidget->SetupAttachment(RootComponent);
+
+	Combat = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
+	Combat->SetIsReplicated(true);
 }
 
 void ABlasterCharacter::BeginPlay()
@@ -63,6 +67,11 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	if (!LookAction)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("%s|LookAction is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+	if (!EquipAction)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|EquipAction is nullptr"), *FString(__FUNCTION__))
 		return;
 	}
 #pragma endregion
@@ -114,6 +123,9 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 	// Looking
 	EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ABlasterCharacter::Look);
+
+	// Equip
+	EnhancedInputComponent->BindAction(EquipAction, ETriggerEvent::Started, this, &ABlasterCharacter::Equip);
 }
 
 void ABlasterCharacter::Move(const FInputActionValue& Value)
@@ -160,6 +172,24 @@ void ABlasterCharacter::Look(const FInputActionValue& Value)
 	AddControllerPitchInput(LookAxisVector.Y);
 }
 
+// ReSharper disable once CppMemberFunctionMayBeConst
+void ABlasterCharacter::Equip()
+{
+#pragma region Nullchecks
+	if (!Combat)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|Combat is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+#pragma endregion
+
+	// only server
+	if (HasAuthority())
+	{
+		Combat->EquipWeapon(OverlappingWeapon);
+	}
+}
+
 void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -185,6 +215,8 @@ void ABlasterCharacter::SetOverlappingWeapon(AWeapon* Weapon)
 }
 
 // Won't be called on server, because replication only works one way (server -> client)
+// ReSharper disable once CppMemberFunctionMayBeConst
+// ReSharper disable once CppParameterMayBeConstPtrOrRef
 void ABlasterCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
 {
 	if (OverlappingWeapon)
@@ -195,4 +227,19 @@ void ABlasterCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
 	{
 		LastWeapon->ShowPickupWidget(false);
 	}
+}
+
+void ABlasterCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+#pragma region Nullchecks
+	if (!Combat)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|Combat is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+#pragma endregion
+
+	Combat->Character = this;
 }

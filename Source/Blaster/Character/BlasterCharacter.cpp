@@ -188,6 +188,10 @@ void ABlasterCharacter::Equip()
 	{
 		Combat->EquipWeapon(OverlappingWeapon);
 	}
+	else
+	{
+		ServerEquip();
+	}
 }
 
 void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -215,9 +219,7 @@ void ABlasterCharacter::SetOverlappingWeapon(AWeapon* Weapon)
 }
 
 // Won't be called on server, because replication only works one way (server -> client)
-// ReSharper disable once CppMemberFunctionMayBeConst
-// ReSharper disable once CppParameterMayBeConstPtrOrRef
-void ABlasterCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
+void ABlasterCharacter::OnRep_OverlappingWeapon(const AWeapon* LastWeapon) const
 {
 	if (OverlappingWeapon)
 	{
@@ -242,4 +244,17 @@ void ABlasterCharacter::PostInitializeComponents()
 #pragma endregion
 
 	Combat->Character = this;
+}
+
+void ABlasterCharacter::ServerEquip_Implementation()
+{
+#pragma region Nullchecks
+	if (!Combat)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|Combat is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+#pragma endregion
+
+	Combat->EquipWeapon(OverlappingWeapon);
 }

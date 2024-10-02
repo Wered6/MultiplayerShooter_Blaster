@@ -95,7 +95,7 @@ public:
 
 private:
 	UFUNCTION()
-	void OnRep_OverlappingWeapon(AWeapon* LastWeapon);
+	void OnRep_OverlappingWeapon(const AWeapon* LastWeapon) const;
 
 	UPROPERTY(ReplicatedUsing=OnRep_OverlappingWeapon)
 	TObjectPtr<AWeapon> OverlappingWeapon;
@@ -112,4 +112,8 @@ private:
 	TObjectPtr<UCombatComponent> Combat;
 
 #pragma endregion
+
+private:
+	UFUNCTION(Server, Reliable)
+	void ServerEquip();
 };

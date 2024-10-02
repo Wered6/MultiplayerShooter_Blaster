@@ -15,7 +15,6 @@ class BLASTER_API UCombatComponent : public UActorComponent
 
 public:
 	UCombatComponent();
-	friend class ABlasterCharacter;
 
 protected:
 	virtual void BeginPlay() override;
@@ -24,8 +23,9 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 public:
+	friend class ABlasterCharacter;
 	void EquipWeapon(AWeapon* WeaponToEquip);
-	
+
 private:
 	TObjectPtr<ABlasterCharacter> Character;
 	TObjectPtr<AWeapon> EquippedWeapon;

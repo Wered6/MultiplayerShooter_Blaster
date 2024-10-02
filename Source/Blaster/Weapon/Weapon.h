@@ -36,10 +36,12 @@ public:
 #pragma region Weapon Properties
 
 public:
-	FORCEINLINE void SetWeaponState(const EWeaponState State)
+	FORCEINLINE USphereComponent* GetAreaSphere() const
 	{
-		WeaponState = State;
+		return AreaSphere;
 	}
+
+	void SetWeaponState(const EWeaponState State);
 
 	void ShowPickupWidget(const bool bShowWidget) const;
 
@@ -65,11 +67,22 @@ private:
 	UPROPERTY(VisibleAnywhere, Category="Weapon Properties")
 	TObjectPtr<USphereComponent> AreaSphere;
 
-	UPROPERTY(VisibleAnywhere, Category="Weapon Properties")
+	UPROPERTY(ReplicatedUsing=OnRep_WeaponState, VisibleAnywhere, Category="Weapon Properties")
 	EWeaponState WeaponState;
 
 	UPROPERTY(VisibleAnywhere, Category="Weapon Properties")
 	TObjectPtr<UWidgetComponent> PickupWidget;
+
+#pragma endregion
+
+#pragma region Replication
+
+public:
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+private:
+	UFUNCTION()
+	void OnRep_WeaponState() const;
 
 #pragma endregion
 };

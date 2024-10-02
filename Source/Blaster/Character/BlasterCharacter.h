@@ -56,6 +56,9 @@ protected:
 	/** Called for equip input */
 	void Equip();
 
+	/** Called for crouch input */
+	void Crouch();
+
 private:
 	/** MappingContext */
 	UPROPERTY(EditDefaultsOnly, Category=Input)
@@ -75,6 +78,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category=Input)
 	TObjectPtr<UInputAction> EquipAction;
+
+	UPROPERTY(EditDefaultsOnly, Category=Input)
+	TObjectPtr<UInputAction> CrouchAction;
 
 #pragma endregion
 

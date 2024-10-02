@@ -34,6 +34,8 @@ ABlasterCharacter::ABlasterCharacter()
 
 	Combat = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
 	Combat->SetIsReplicated(true);
+
+	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
 }
 
 void ABlasterCharacter::BeginPlay()
@@ -72,6 +74,11 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	if (!EquipAction)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("%s|EquipAction is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+	if (!CrouchAction)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|CrouchAction is nullptr"), *FString(__FUNCTION__))
 		return;
 	}
 #pragma endregion
@@ -126,6 +133,9 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 	// Equip
 	EnhancedInputComponent->BindAction(EquipAction, ETriggerEvent::Started, this, &ABlasterCharacter::Equip);
+
+	// Crouch
+	EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &ABlasterCharacter::Crouch);
 }
 
 void ABlasterCharacter::Move(const FInputActionValue& Value)
@@ -192,6 +202,11 @@ void ABlasterCharacter::Equip()
 	{
 		ServerEquip();
 	}
+}
+
+void ABlasterCharacter::Crouch()
+{
+	bIsCrouched ? ACharacter::UnCrouch() : ACharacter::Crouch();
 }
 
 void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

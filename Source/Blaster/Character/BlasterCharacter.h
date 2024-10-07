@@ -54,10 +54,10 @@ protected:
 	void Look(const FInputActionValue& Value);
 
 	/** Called for equip input */
-	void Equip();
+	void EquipButtonPressed();
 
 	/** Called for crouch input */
-	void Crouch();
+	void CrouchButtonPressed();
 
 	/** Called for aim input */
 	void AimButtonPressed();

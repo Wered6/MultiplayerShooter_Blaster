@@ -137,10 +137,10 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ABlasterCharacter::Look);
 
 	// Equip
-	EnhancedInputComponent->BindAction(EquipAction, ETriggerEvent::Started, this, &ABlasterCharacter::Equip);
+	EnhancedInputComponent->BindAction(EquipAction, ETriggerEvent::Started, this, &ABlasterCharacter::EquipButtonPressed);
 
 	// Crouch
-	EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &ABlasterCharacter::Crouch);
+	EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &ABlasterCharacter::CrouchButtonPressed);
 
 	// Aim
 	EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &ABlasterCharacter::AimButtonPressed);
@@ -192,7 +192,7 @@ void ABlasterCharacter::Look(const FInputActionValue& Value)
 }
 
 // ReSharper disable once CppMemberFunctionMayBeConst
-void ABlasterCharacter::Equip()
+void ABlasterCharacter::EquipButtonPressed()
 {
 #pragma region Nullchecks
 	if (!Combat)
@@ -213,11 +213,12 @@ void ABlasterCharacter::Equip()
 	}
 }
 
-void ABlasterCharacter::Crouch()
+void ABlasterCharacter::CrouchButtonPressed()
 {
-	bIsCrouched ? ACharacter::UnCrouch() : ACharacter::Crouch();
+	bIsCrouched ? UnCrouch() : Crouch();
 }
 
+// ReSharper disable once CppMemberFunctionMayBeConst
 void ABlasterCharacter::AimButtonPressed()
 {
 #pragma region Nullchecks
@@ -231,6 +232,7 @@ void ABlasterCharacter::AimButtonPressed()
 	Combat->SetAiming(true);
 }
 
+// ReSharper disable once CppMemberFunctionMayBeConst
 void ABlasterCharacter::AimButtonReleased()
 {
 #pragma region Nullchecks

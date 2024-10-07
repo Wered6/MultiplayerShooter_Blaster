@@ -41,8 +41,11 @@ protected:
 	UFUNCTION(Server, Reliable)
 	void ServerSetAiming(const bool bIsAiming);
 
+	UFUNCTION()
+	void OnRep_EquippedWeapon() const;
+
 private:
-	UPROPERTY(Replicated)
+	UPROPERTY(ReplicatedUsing=OnRep_EquippedWeapon)
 	TObjectPtr<AWeapon> EquippedWeapon;
 
 	UPROPERTY(Replicated)

@@ -11,6 +11,7 @@
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
 
 ABlasterCharacter::ABlasterCharacter()
@@ -50,6 +51,8 @@ void ABlasterCharacter::BeginPlay()
 void ABlasterCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	AimOffset(DeltaTime);
 }
 
 void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -302,6 +305,52 @@ void ABlasterCharacter::PostInitializeComponents()
 	Combat->Character = this;
 }
 
+bool ABlasterCharacter::IsWeaponEquipped() const
+{
+	return Combat && Combat->EquippedWeapon;
+}
+
+bool ABlasterCharacter::IsAiming() const
+{
+	return Combat && Combat->bAiming;
+}
+
+void ABlasterCharacter::AimOffset(float DeltaTime)
+{
+	if (Combat && !Combat->EquippedWeapon)
+	{
+		return;
+	}
+
+	FVector Velocity = GetVelocity();
+	Velocity.Z = 0.f;
+	const float Speed{static_cast<float>(Velocity.Size())};
+	const bool bIsInAir{GetCharacterMovement()->IsFalling()};
+
+	if (Speed == 0.f && !bIsInAir) // standing still, and not jumping
+	{
+		const FRotator CurrentAimRotation{FRotator(0.f, GetBaseAimRotation().Yaw, 0.f)};
+		const FRotator DeltaAimRotation{UKismetMathLibrary::NormalizedDeltaRotator(CurrentAimRotation, StartingAimRotation)};
+		AO_Yaw = DeltaAimRotation.Yaw;
+		bUseControllerRotationYaw = false;
+	}
+	if (Speed > 0.f || bIsInAir) // running, or jumping
+	{
+		StartingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
+		AO_Yaw = 0.f;
+		bUseControllerRotationYaw = true;
+	}
+
+	AO_Pitch = GetBaseAimRotation().Pitch;
+	if (AO_Pitch > 90.f && !IsLocallyControlled())
+	{
+		// map pitch from [270, 360) to [-90, 0)
+		const FVector2D InRange(270.f, 360.f);
+		const FVector2D OutRange(-90.f, 0.f);
+		AO_Pitch = FMath::GetMappedRangeValueClamped(InRange, OutRange, AO_Pitch);
+	}
+}
+
 void ABlasterCharacter::ServerEquip_Implementation()
 {
 #pragma region Nullchecks
@@ -313,14 +362,4 @@ void ABlasterCharacter::ServerEquip_Implementation()
 #pragma endregion
 
 	Combat->EquipWeapon(OverlappingWeapon);
-}
-
-bool ABlasterCharacter::IsWeaponEquipped() const
-{
-	return Combat && Combat->EquippedWeapon;
-}
-
-bool ABlasterCharacter::IsAiming() const
-{
-	return Combat && Combat->bAiming;
 }

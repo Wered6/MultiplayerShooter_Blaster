@@ -32,6 +32,12 @@ protected:
 private:
 	TObjectPtr<ABlasterCharacter> Character;
 
+	UPROPERTY(EditAnywhere)
+	float BaseWalkSpeed;
+	
+	UPROPERTY(EditAnywhere)
+	float AimWalkSpeed;
+
 #pragma region Replication
 
 public:

@@ -12,12 +12,26 @@
 UCombatComponent::UCombatComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+
 	bAiming = false;
+
+	BaseWalkSpeed = 600.f;
+	AimWalkSpeed = 450.f;
 }
 
 void UCombatComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+#pragma region Nullchecks
+	if (!Character)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|Character is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+#pragma endregion
+
+	Character->GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
 }
 
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -72,6 +86,8 @@ void UCombatComponent::SetAiming(const bool bIsAiming)
 
 	bAiming = bIsAiming;
 	ServerSetAiming(bIsAiming);
+
+	Character->GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : BaseWalkSpeed;
 }
 
 void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -101,5 +117,15 @@ void UCombatComponent::OnRep_EquippedWeapon() const
 
 void UCombatComponent::ServerSetAiming_Implementation(const bool bIsAiming)
 {
+#pragma region Nullchecks
+	if (!Character)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|Character is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+#pragma endregion
+
 	bAiming = bIsAiming;
+
+	Character->GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : BaseWalkSpeed;
 }

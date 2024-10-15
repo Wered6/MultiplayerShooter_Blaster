@@ -41,6 +41,11 @@ public:
 		return AreaSphere;
 	}
 
+	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() const
+	{
+		return WeaponMesh;
+	}
+
 	void SetWeaponState(const EWeaponState State);
 
 	void ShowPickupWidget(const bool bShowWidget) const;

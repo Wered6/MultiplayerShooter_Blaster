@@ -315,6 +315,19 @@ bool ABlasterCharacter::IsAiming() const
 	return Combat && Combat->bAiming;
 }
 
+AWeapon* ABlasterCharacter::GetEquippedWeapon() const
+{
+#pragma region Nullchecks
+	if (!Combat)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|Combat is nullptr"), *FString(__FUNCTION__))
+		return nullptr;
+	}
+#pragma endregion
+
+	return Combat->EquippedWeapon;
+}
+
 void ABlasterCharacter::AimOffset(float DeltaTime)
 {
 	if (Combat && !Combat->EquippedWeapon)

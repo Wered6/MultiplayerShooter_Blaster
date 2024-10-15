@@ -6,7 +6,9 @@
 #include "Animation/AnimInstance.h"
 #include "BlasterAnimInstance.generated.h"
 
+class AWeapon;
 class ABlasterCharacter;
+
 UCLASS()
 class BLASTER_API UBlasterAnimInstance : public UAnimInstance
 {
@@ -32,6 +34,8 @@ private:
 	UPROPERTY(BlueprintReadOnly, Category=Movement, meta=(AllowPrivateAccess="true"))
 	bool bWeaponEquipped;
 
+	TObjectPtr<AWeapon> EquippedWeapon;
+
 	UPROPERTY(BlueprintReadOnly, Category=Movement, meta=(AllowPrivateAccess="true"))
 	bool bIsCrouched;
 
@@ -53,4 +57,7 @@ private:
 
 	UPROPERTY(BlueprintReadOnly, Category=Movement, meta=(AllowPrivateAccess="true"))
 	float AO_Pitch;
+
+	UPROPERTY(BlueprintReadOnly, Category=Movement, meta=(AllowPrivateAccess="true"))
+	FTransform LeftHandTransform;
 };

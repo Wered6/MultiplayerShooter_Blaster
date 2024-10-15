@@ -143,6 +143,8 @@ public:
 		return AO_Pitch;
 	}
 
+	AWeapon* GetEquippedWeapon() const;
+
 protected:
 	void AimOffset(float DeltaTime);
 

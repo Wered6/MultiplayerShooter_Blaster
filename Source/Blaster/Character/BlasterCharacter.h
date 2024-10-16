@@ -7,6 +7,7 @@
 #include "GameFramework/Character.h"
 #include "BlasterCharacter.generated.h"
 
+enum class ETurningInPlace : uint8;
 class UCombatComponent;
 class AWeapon;
 class UWidgetComponent;
@@ -145,14 +146,22 @@ public:
 
 	AWeapon* GetEquippedWeapon() const;
 
+	FORCEINLINE ETurningInPlace GetTurningInPlace() const
+	{
+		return TurningInPlace;
+	}
+
 protected:
 	void AimOffset(float DeltaTime);
 
 private:
 	UFUNCTION(Server, Reliable)
 	void ServerEquip();
+	void TurnInPlace(float DeltaTime);
 
 	float AO_Yaw;
 	float AO_Pitch;
 	FRotator StartingAimRotation;
+
+	ETurningInPlace TurningInPlace;
 };

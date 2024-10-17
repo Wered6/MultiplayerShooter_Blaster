@@ -64,6 +64,9 @@ protected:
 	void AimButtonPressed();
 	void AimButtonReleased();
 
+	/** Called for jump input */
+	virtual void Jump() override;
+
 private:
 	/** MappingContext */
 	UPROPERTY(EditDefaultsOnly, Category=Input)

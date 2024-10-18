@@ -99,30 +99,6 @@ void UCombatComponent::SetAiming(const bool bIsAiming)
 	Character->GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : BaseWalkSpeed;
 }
 
-void UCombatComponent::FireButtonPressed(const bool bPressed)
-{
-	bFireButtonPressed = bPressed;
-
-#pragma region Nullchecks
-	if (!Character)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("%s|Character is nullptr"), *FString(__FUNCTION__))
-		return;
-	}
-	if (!EquippedWeapon)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("%s|EquippedWeapon is nullptr"), *FString(__FUNCTION__))
-		return;
-	}
-#pragma endregion
-
-	if (bFireButtonPressed)
-	{
-		Character->PlayFireMontage(bAiming);
-		EquippedWeapon->Fire();
-	}
-}
-
 void UCombatComponent::ServerSetAiming_Implementation(const bool bIsAiming)
 {
 #pragma region Nullchecks
@@ -154,3 +130,39 @@ void UCombatComponent::OnRep_EquippedWeapon() const
 		Character->bUseControllerRotationYaw = true;
 	}
 }
+
+void UCombatComponent::FireButtonPressed(const bool bPressed)
+{
+	bFireButtonPressed = bPressed;
+
+	if (bFireButtonPressed)
+	{
+		ServerFire();
+	}
+}
+
+void UCombatComponent::ServerFire_Implementation()
+{
+	MulticastFire();
+}
+
+void UCombatComponent::MulticastFire_Implementation()
+{
+#pragma region Nullchecks
+	if (!Character)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|Character is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+	if (!EquippedWeapon)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|EquippedWeapon is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+#pragma endregion
+
+	Character->PlayFireMontage(bAiming);
+	EquippedWeapon->Fire();
+}
+
+

@@ -30,14 +30,17 @@ public:
 
 protected:
 	void SetAiming(const bool bIsAiming);
-
-	void FireButtonPressed(const bool bPressed);
-
 	UFUNCTION(Server, Reliable)
 	void ServerSetAiming(const bool bIsAiming);
 
 	UFUNCTION()
 	void OnRep_EquippedWeapon() const;
+
+	void FireButtonPressed(const bool bPressed);
+	UFUNCTION(Server, Reliable)
+	void ServerFire();
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastFire();
 
 private:
 	TObjectPtr<ABlasterCharacter> Character;

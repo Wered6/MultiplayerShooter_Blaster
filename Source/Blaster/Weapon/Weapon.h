@@ -27,13 +27,13 @@ class BLASTER_API AWeapon : public AActor
 public:
 	AWeapon();
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 protected:
 	virtual void BeginPlay() override;
 
 public:
 	virtual void Tick(float DeltaTime) override;
-
-#pragma region Weapon Properties
 
 public:
 	FORCEINLINE USphereComponent* GetAreaSphere() const
@@ -66,6 +66,9 @@ protected:
 	                        int32 OtherBodyIndex);
 
 private:
+	UFUNCTION()
+	void OnRep_WeaponState() const;
+
 	UPROPERTY(VisibleAnywhere, Category="Weapon Properties")
 	TObjectPtr<USkeletalMeshComponent> WeaponMesh;
 
@@ -77,17 +80,4 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category="Weapon Properties")
 	TObjectPtr<UWidgetComponent> PickupWidget;
-
-#pragma endregion
-
-#pragma region Replication
-
-public:
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-
-private:
-	UFUNCTION()
-	void OnRep_WeaponState() const;
-
-#pragma endregion
 };

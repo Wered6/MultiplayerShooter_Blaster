@@ -109,11 +109,17 @@ void UCombatComponent::FireButtonPressed(const bool bPressed)
 		UE_LOG(LogTemp, Warning, TEXT("%s|Character is nullptr"), *FString(__FUNCTION__))
 		return;
 	}
+	if (!EquippedWeapon)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|EquippedWeapon is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
 #pragma endregion
 
 	if (bFireButtonPressed)
 	{
 		Character->PlayFireMontage(bAiming);
+		EquippedWeapon->Fire();
 	}
 }
 

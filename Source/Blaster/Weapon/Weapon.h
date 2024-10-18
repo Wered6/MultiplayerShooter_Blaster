@@ -50,6 +50,8 @@ public:
 
 	void ShowPickupWidget(const bool bShowWidget) const;
 
+	void Fire();
+
 protected:
 	UFUNCTION()
 	virtual void OnSphereOverlap(UPrimitiveComponent* OverlappedComponent,
@@ -80,4 +82,7 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category="Weapon Properties")
 	TObjectPtr<UWidgetComponent> PickupWidget;
+
+	UPROPERTY(EditAnywhere, Category="Weapon Properties")
+	TObjectPtr<UAnimationAsset> FireAnimation;
 };

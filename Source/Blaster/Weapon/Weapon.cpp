@@ -99,6 +99,24 @@ void AWeapon::ShowPickupWidget(const bool bShowWidget) const
 	PickupWidget->SetVisibility(bShowWidget);
 }
 
+void AWeapon::Fire()
+{
+#pragma region Nullchecks
+	if (!FireAnimation)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|FireAnimation is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+	if (!WeaponMesh)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|WeaponMesh is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+#pragma endregion
+
+	WeaponMesh->PlayAnimation(FireAnimation, false);
+}
+
 // Gets called only on server
 void AWeapon::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent,
                               AActor* OtherActor,

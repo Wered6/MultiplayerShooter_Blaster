@@ -67,6 +67,10 @@ protected:
 	/** Called for jump input */
 	virtual void Jump() override;
 
+	/** Called for fire input */
+	void FireButtonPressed();
+	void FireButtonReleased();
+
 private:
 	/** MappingContext */
 	UPROPERTY(EditDefaultsOnly, Category=Input)
@@ -95,6 +99,10 @@ private:
 	/** Aim Input Action */
 	UPROPERTY(EditDefaultsOnly, Category=Input)
 	TObjectPtr<UInputAction> AimAction;
+
+	/** Fire Input Action */
+	UPROPERTY(EditDefaultsOnly, Category=Input)
+	TObjectPtr<UInputAction> FireAction;
 
 #pragma endregion
 
@@ -154,6 +162,8 @@ public:
 		return TurningInPlace;
 	}
 
+	void PlayFireMontage(bool bAiming);
+
 protected:
 	void AimOffset(float DeltaTime);
 
@@ -168,4 +178,7 @@ private:
 	FRotator StartingAimRotation;
 
 	ETurningInPlace TurningInPlace;
+
+	UPROPERTY(EditAnywhere, Category=Combat)
+	TObjectPtr<UAnimMontage> FireWeaponMontage;
 };

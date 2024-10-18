@@ -29,14 +29,18 @@ public:
 protected:
 	void SetAiming(const bool bIsAiming);
 
+	void FireButtonPressed(const bool bPressed);
+
 private:
 	TObjectPtr<ABlasterCharacter> Character;
 
 	UPROPERTY(EditAnywhere)
 	float BaseWalkSpeed;
-	
+
 	UPROPERTY(EditAnywhere)
 	float AimWalkSpeed;
+
+	bool bFireButtonPressed;
 
 #pragma region Replication
 

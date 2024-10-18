@@ -99,6 +99,11 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		UE_LOG(LogTemp, Warning, TEXT("%s|AimAction is nullptr"), *FString(__FUNCTION__))
 		return;
 	}
+	if (!FireAction)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|FireAction is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
 #pragma endregion
 
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -158,6 +163,10 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	// Aim
 	EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &ABlasterCharacter::AimButtonPressed);
 	EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &ABlasterCharacter::AimButtonReleased);
+
+	// Fire
+	EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &ABlasterCharacter::FireButtonPressed);
+	EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this, &ABlasterCharacter::FireButtonReleased);
 }
 
 void ABlasterCharacter::Move(const FInputActionValue& Value)
@@ -271,6 +280,32 @@ void ABlasterCharacter::Jump()
 	}
 }
 
+void ABlasterCharacter::FireButtonPressed()
+{
+#pragma region Nullchecks
+	if (!Combat)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|Combat is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+#pragma endregion
+
+	Combat->FireButtonPressed(true);
+}
+
+void ABlasterCharacter::FireButtonReleased()
+{
+#pragma region Nullchecks
+	if (!Combat)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|Combat is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+#pragma endregion
+
+	Combat->FireButtonPressed(false);
+}
+
 void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -344,6 +379,41 @@ AWeapon* ABlasterCharacter::GetEquippedWeapon() const
 #pragma endregion
 
 	return Combat->EquippedWeapon;
+}
+
+void ABlasterCharacter::PlayFireMontage(bool bAiming)
+{
+#pragma region Nullchecks
+	if (!Combat)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|Combat is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+	if (!Combat->EquippedWeapon)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|Combat->EquippedWeapon is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+	if (!FireWeaponMontage)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|FireWeaponMontage is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+#pragma endregion
+
+	UAnimInstance* AnimInstance{GetMesh()->GetAnimInstance()};
+
+#pragma region Nullchecks
+	if (!AnimInstance)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|AnimInstance is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+#pragma endregion
+
+	AnimInstance->Montage_Play(FireWeaponMontage);
+	FName SectionName{bAiming ? FName("RifleAim") : FName("RifleHip")};
+	AnimInstance->Montage_JumpToSection(SectionName);
 }
 
 void ABlasterCharacter::AimOffset(float DeltaTime)

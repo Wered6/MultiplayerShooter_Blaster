@@ -49,6 +49,14 @@ ABlasterCharacter::ABlasterCharacter()
 	MinNetUpdateFrequency = 33.f;
 }
 
+
+void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME_CONDITION(ABlasterCharacter, OverlappingWeapon, COND_OwnerOnly);
+}
+
 void ABlasterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -280,6 +288,7 @@ void ABlasterCharacter::Jump()
 	}
 }
 
+// ReSharper disable once CppMemberFunctionMayBeConst
 void ABlasterCharacter::FireButtonPressed()
 {
 #pragma region Nullchecks
@@ -293,6 +302,7 @@ void ABlasterCharacter::FireButtonPressed()
 	Combat->FireButtonPressed(true);
 }
 
+// ReSharper disable once CppMemberFunctionMayBeConst
 void ABlasterCharacter::FireButtonReleased()
 {
 #pragma region Nullchecks
@@ -306,11 +316,19 @@ void ABlasterCharacter::FireButtonReleased()
 	Combat->FireButtonPressed(false);
 }
 
-void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+void ABlasterCharacter::PostInitializeComponents()
 {
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	Super::PostInitializeComponents();
 
-	DOREPLIFETIME_CONDITION(ABlasterCharacter, OverlappingWeapon, COND_OwnerOnly);
+#pragma region Nullchecks
+	if (!Combat)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|Combat is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+#pragma endregion
+
+	Combat->Character = this;
 }
 
 // Gets called only on server
@@ -328,34 +346,6 @@ void ABlasterCharacter::SetOverlappingWeapon(AWeapon* Weapon)
 			OverlappingWeapon->ShowPickupWidget(true);
 		}
 	}
-}
-
-// Won't be called on server, because replication only works one way (server -> client)
-void ABlasterCharacter::OnRep_OverlappingWeapon(const AWeapon* LastWeapon) const
-{
-	if (OverlappingWeapon)
-	{
-		OverlappingWeapon->ShowPickupWidget(true);
-	}
-	if (LastWeapon)
-	{
-		LastWeapon->ShowPickupWidget(false);
-	}
-}
-
-void ABlasterCharacter::PostInitializeComponents()
-{
-	Super::PostInitializeComponents();
-
-#pragma region Nullchecks
-	if (!Combat)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("%s|Combat is nullptr"), *FString(__FUNCTION__))
-		return;
-	}
-#pragma endregion
-
-	Combat->Character = this;
 }
 
 bool ABlasterCharacter::IsWeaponEquipped() const
@@ -458,6 +448,32 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 	}
 }
 
+// Won't be called on server, because replication only works one way (server -> client)
+void ABlasterCharacter::OnRep_OverlappingWeapon(const AWeapon* LastWeapon) const
+{
+	if (OverlappingWeapon)
+	{
+		OverlappingWeapon->ShowPickupWidget(true);
+	}
+	if (LastWeapon)
+	{
+		LastWeapon->ShowPickupWidget(false);
+	}
+}
+
+void ABlasterCharacter::ServerEquip_Implementation()
+{
+#pragma region Nullchecks
+	if (!Combat)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|Combat is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+#pragma endregion
+
+	Combat->EquipWeapon(OverlappingWeapon);
+}
+
 void ABlasterCharacter::TurnInPlace(float DeltaTime)
 {
 	if (AO_Yaw > 90.f)
@@ -478,17 +494,4 @@ void ABlasterCharacter::TurnInPlace(float DeltaTime)
 			StartingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
 		}
 	}
-}
-
-void ABlasterCharacter::ServerEquip_Implementation()
-{
-#pragma region Nullchecks
-	if (!Combat)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("%s|Combat is nullptr"), *FString(__FUNCTION__))
-		return;
-	}
-#pragma endregion
-
-	Combat->EquipWeapon(OverlappingWeapon);
 }

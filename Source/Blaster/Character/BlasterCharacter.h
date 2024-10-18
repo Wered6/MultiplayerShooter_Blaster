@@ -25,6 +25,8 @@ class BLASTER_API ABlasterCharacter : public ACharacter
 public:
 	ABlasterCharacter();
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -114,22 +116,6 @@ private:
 
 #pragma endregion
 
-#pragma region Replication
-
-public:
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-
-	void SetOverlappingWeapon(AWeapon* Weapon);
-
-private:
-	UFUNCTION()
-	void OnRep_OverlappingWeapon(const AWeapon* LastWeapon) const;
-
-	UPROPERTY(ReplicatedUsing=OnRep_OverlappingWeapon)
-	TObjectPtr<AWeapon> OverlappingWeapon;
-
-#pragma endregion
-
 #pragma region Components
 
 public:
@@ -141,9 +127,14 @@ private:
 
 #pragma endregion
 
+#pragma region Weapon
+
 public:
+	void SetOverlappingWeapon(AWeapon* Weapon);
+
 	bool IsWeaponEquipped() const;
 	bool IsAiming() const;
+	AWeapon* GetEquippedWeapon() const;
 
 	FORCEINLINE float GetAO_Yaw() const
 	{
@@ -154,8 +145,6 @@ public:
 	{
 		return AO_Pitch;
 	}
-
-	AWeapon* GetEquippedWeapon() const;
 
 	FORCEINLINE ETurningInPlace GetTurningInPlace() const
 	{
@@ -168,9 +157,15 @@ protected:
 	void AimOffset(float DeltaTime);
 
 private:
+	UFUNCTION()
+	void OnRep_OverlappingWeapon(const AWeapon* LastWeapon) const;
+
 	UFUNCTION(Server, Reliable)
 	void ServerEquip();
 	void TurnInPlace(float DeltaTime);
+
+	UPROPERTY(ReplicatedUsing=OnRep_OverlappingWeapon)
+	TObjectPtr<AWeapon> OverlappingWeapon;
 
 	float AO_Yaw;
 	float InterpAO_Yaw;
@@ -181,4 +176,6 @@ private:
 
 	UPROPERTY(EditAnywhere, Category=Combat)
 	TObjectPtr<UAnimMontage> FireWeaponMontage;
+
+#pragma endregion
 };

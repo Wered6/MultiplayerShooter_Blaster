@@ -20,6 +20,14 @@ UCombatComponent::UCombatComponent()
 	AimWalkSpeed = 450.f;
 }
 
+void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UCombatComponent, EquippedWeapon);
+	DOREPLIFETIME(UCombatComponent, bAiming);
+}
+
 void UCombatComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -109,12 +117,19 @@ void UCombatComponent::FireButtonPressed(const bool bPressed)
 	}
 }
 
-void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+void UCombatComponent::ServerSetAiming_Implementation(const bool bIsAiming)
 {
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+#pragma region Nullchecks
+	if (!Character)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|Character is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+#pragma endregion
 
-	DOREPLIFETIME(UCombatComponent, EquippedWeapon);
-	DOREPLIFETIME(UCombatComponent, bAiming);
+	bAiming = bIsAiming;
+
+	Character->GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : BaseWalkSpeed;
 }
 
 void UCombatComponent::OnRep_EquippedWeapon() const
@@ -132,19 +147,4 @@ void UCombatComponent::OnRep_EquippedWeapon() const
 		Character->GetCharacterMovement()->bOrientRotationToMovement = false;
 		Character->bUseControllerRotationYaw = true;
 	}
-}
-
-void UCombatComponent::ServerSetAiming_Implementation(const bool bIsAiming)
-{
-#pragma region Nullchecks
-	if (!Character)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("%s|Character is nullptr"), *FString(__FUNCTION__))
-		return;
-	}
-#pragma endregion
-
-	bAiming = bIsAiming;
-
-	Character->GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : BaseWalkSpeed;
 }

@@ -9,6 +9,11 @@ void AProjectileWeapon::Fire(const FVector& HitTarget)
 {
 	Super::Fire(HitTarget);
 
+	if (!HasAuthority())
+	{
+		return;
+	}
+
 	const USkeletalMeshSocket* MuzzleFlashSocket{GetWeaponMesh()->GetSocketByName(FName("MuzzleFlash"))};
 	APawn* InstigatorPawn{Cast<APawn>(GetOwner())};
 	UWorld* World{GetWorld()};

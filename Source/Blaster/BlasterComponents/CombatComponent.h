@@ -62,4 +62,6 @@ private:
 
 	UPROPERTY(Replicated)
 	bool bAiming;
+
+	FVector HitTarget;
 };

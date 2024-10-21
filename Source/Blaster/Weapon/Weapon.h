@@ -50,7 +50,7 @@ public:
 
 	void ShowPickupWidget(const bool bShowWidget) const;
 
-	void Fire();
+	virtual void Fire(const FVector& HitTarget);
 
 protected:
 	UFUNCTION()

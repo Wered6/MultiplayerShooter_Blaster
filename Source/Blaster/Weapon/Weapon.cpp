@@ -99,7 +99,7 @@ void AWeapon::ShowPickupWidget(const bool bShowWidget) const
 	PickupWidget->SetVisibility(bShowWidget);
 }
 
-void AWeapon::Fire()
+void AWeapon::Fire(const FVector& HitTarget)
 {
 #pragma region Nullchecks
 	if (!FireAnimation)

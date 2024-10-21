@@ -166,7 +166,7 @@ void UCombatComponent::MulticastFire_Implementation()
 #pragma endregion
 
 	Character->PlayFireMontage(bAiming);
-	EquippedWeapon->Fire();
+	EquippedWeapon->Fire(HitTarget);
 }
 
 void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
@@ -202,7 +202,6 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 	if (bScreenToWorld)
 	{
 		const FVector Start{CrosshairWorldPosition};
-
 		const FVector End{Start + CrosshairWorldDirection * TRACE_LENGTH};
 
 		GetWorld()->LineTraceSingleByChannel(
@@ -214,9 +213,11 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 		if (!TraceHitResult.bBlockingHit)
 		{
 			TraceHitResult.ImpactPoint = End;
+			HitTarget = End;
 		}
 		else
 		{
+			HitTarget = TraceHitResult.ImpactPoint;
 			DrawDebugSphere(
 				GetWorld(),
 				TraceHitResult.ImpactPoint,

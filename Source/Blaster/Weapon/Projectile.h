@@ -23,6 +23,13 @@ protected:
 public:
 	virtual void Tick(float DeltaTime) override;
 
+public:
+	virtual void Destroyed() override;
+
+protected:
+	UFUNCTION()
+	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+
 private:
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UBoxComponent> CollisionBox;
@@ -34,4 +41,10 @@ private:
 	TObjectPtr<UParticleSystem> Tracer;
 
 	TObjectPtr<UParticleSystemComponent> TracerComponent;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UParticleSystem> ImpactParticles;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<USoundCue> ImpactSound;
 };

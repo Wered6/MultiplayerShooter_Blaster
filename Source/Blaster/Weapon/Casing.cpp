@@ -12,6 +12,7 @@ ACasing::ACasing()
 	CasingMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CasingMesh"));
 	SetRootComponent(CasingMesh);
 	CasingMesh->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+	CasingMesh->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 	CasingMesh->SetSimulatePhysics(true);
 	CasingMesh->SetEnableGravity(true);
 	CasingMesh->SetNotifyRigidBodyCollision(true);
@@ -34,7 +35,12 @@ void ACasing::BeginPlay()
 #pragma endregion
 
 	CasingMesh->OnComponentHit.AddDynamic(this, &ACasing::OnHit);
-	CasingMesh->AddImpulse(GetActorForwardVector() * ShellEjectionImpulse);
+
+	// Add randomness in rotation
+	FVector CasingMeshImpulseVector{GetActorForwardVector()};
+	CasingMeshImpulseVector.Y += FMath::RandRange(-0.2f, 0.2f);
+	CasingMeshImpulseVector.Z += FMath::RandRange(-0.2f, 0.2f);
+	CasingMesh->AddImpulse(CasingMeshImpulseVector * ShellEjectionImpulse);
 
 	SetLifeSpan(LifeSpan);
 }

@@ -2,9 +2,11 @@
 
 
 #include "Weapon.h"
+#include "Casing.h"
 #include "Blaster/Character/BlasterCharacter.h"
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Engine/SkeletalMeshSocket.h"
 #include "Net/UnrealNetwork.h"
 
 AWeapon::AWeapon()
@@ -112,9 +114,38 @@ void AWeapon::Fire(const FVector& HitTarget)
 		UE_LOG(LogTemp, Warning, TEXT("%s|WeaponMesh is nullptr"), *FString(__FUNCTION__))
 		return;
 	}
+	if (!CasingClass)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|CasingClass is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
 #pragma endregion
 
 	WeaponMesh->PlayAnimation(FireAnimation, false);
+
+	const USkeletalMeshSocket* AmmoEjectSocket{WeaponMesh->GetSocketByName(FName("AmmoEject"))};
+	UWorld* World{GetWorld()};
+
+#pragma region Nullchecks
+	if (!AmmoEjectSocket)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|MuzzleFlashSocket is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+	if (!World)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|World is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+#pragma endregion
+
+	const FTransform SocketTransform{AmmoEjectSocket->GetSocketTransform(WeaponMesh)};
+
+	World->SpawnActor<ACasing>(
+		CasingClass,
+		SocketTransform.GetLocation(),
+		SocketTransform.GetRotation().Rotator()
+	);
 }
 
 // Gets called only on server

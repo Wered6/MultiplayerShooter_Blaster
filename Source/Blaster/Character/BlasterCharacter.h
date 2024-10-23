@@ -25,6 +25,8 @@ class BLASTER_API ABlasterCharacter : public ACharacter
 public:
 	ABlasterCharacter();
 
+	virtual void OnRep_PlayerState() override;
+	virtual void PossessedBy(AController* NewController) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:
@@ -109,6 +111,10 @@ private:
 #pragma endregion
 
 #pragma region HUD
+
+protected:
+	UFUNCTION(BlueprintImplementableEvent)
+	void ShowPlayerName();
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess="true"), Category=HUD)

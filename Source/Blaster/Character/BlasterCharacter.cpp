@@ -32,7 +32,7 @@ ABlasterCharacter::ABlasterCharacter()
 	bUseControllerRotationYaw = false;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 
-	// tood display name instead of proxy
+	// todo display name instead of proxy
 	OverheadWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("OverheadWidget"));
 	OverheadWidget->SetupAttachment(RootComponent);
 
@@ -50,6 +50,21 @@ ABlasterCharacter::ABlasterCharacter()
 	MinNetUpdateFrequency = 33.f;
 }
 
+// Called on clients for all characters
+void ABlasterCharacter::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+
+	ShowPlayerName();
+}
+
+// Called on server for clients' characters, but not for server's character
+void ABlasterCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	ShowPlayerName();
+}
 
 void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -61,6 +76,11 @@ void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 void ABlasterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (HasAuthority() && IsLocallyControlled())
+	{
+		ShowPlayerName();
+	}
 }
 
 void ABlasterCharacter::Tick(float DeltaTime)

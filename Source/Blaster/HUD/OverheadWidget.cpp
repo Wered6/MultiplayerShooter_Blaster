@@ -5,6 +5,85 @@
 #include "Components/TextBlock.h"
 #include "GameFramework/PlayerState.h"
 
+void UOverheadWidget::ShowPlayerNetRole(APawn* InPawn, ENRole NetRole) const
+{
+#pragma region Nullchecks
+	if (!InPawn)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|InPawn is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+#pragma endregion
+
+	ENetRole Role{};
+	const ENetRole RemoteRole{InPawn->GetRemoteRole()};
+	const ENetRole LocalRole{InPawn->GetLocalRole()};
+	switch (NetRole)
+	{
+	case ENRole::Remote:
+		Role = RemoteRole;
+		break;
+	case ENRole::Local:
+		Role = LocalRole;
+		break;
+	}
+
+	FString RoleString;
+	switch (Role)
+	{
+	case ROLE_None:
+		RoleString = FString("None");
+		break;
+	case ROLE_SimulatedProxy:
+		RoleString = FString("SimulatedProxy");
+		break;
+	case ROLE_AutonomousProxy:
+		RoleString = FString("AutonomousProxy");
+		break;
+	case ROLE_Authority:
+		RoleString = FString("Authority");
+		break;
+	case ROLE_MAX:
+		break;
+	}
+
+	switch (NetRole)
+	{
+	case ENRole::Remote:
+		SetDisplayText(FString::Printf(TEXT("Remote Role: %s"), *RoleString));
+		break;
+	case ENRole::Local:
+		SetDisplayText(FString::Printf(TEXT("Local Role: %s"), *RoleString));
+		break;
+	}
+}
+
+void UOverheadWidget::ShowPlayerName(APawn* InPawn) const
+{
+#pragma region Nullchecks
+	if (!InPawn)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|InPawn is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+	if (!InPawn->GetPlayerState())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|InPawn->GetPlayerState() is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+#pragma endregion
+
+	const FString PlayerName{InPawn->GetPlayerState()->GetPlayerName()};
+	SetDisplayText(PlayerName);
+}
+
+void UOverheadWidget::NativeDestruct()
+{
+	RemoveFromParent();
+
+	Super::NativeDestruct();
+}
+
 void UOverheadWidget::SetDisplayText(const FString& TextToDisplay) const
 {
 #pragma region Nullchecks
@@ -16,46 +95,4 @@ void UOverheadWidget::SetDisplayText(const FString& TextToDisplay) const
 #pragma endregion
 
 	DisplayText->SetText(FText::FromString(TextToDisplay));
-}
-
-void UOverheadWidget::ShowPlayerNetRole(APawn* InPawn) const
-{
-#pragma region Nullchecks
-	if (!InPawn)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("%s|InPawn is nullptr"), *FString(__FUNCTION__))
-		return;
-	}
-#pragma endregion
-
-	const ENetRole RemoteRole{InPawn->GetRemoteRole()};
-	const ENetRole LocalROle{InPawn->GetLocalRole()};
-
-	FString Role;
-	switch (RemoteRole)
-	{
-	case ROLE_None:
-		Role = FString("None");
-		break;
-	case ROLE_SimulatedProxy:
-		Role = FString("SimulatedProxy");
-		break;
-	case ROLE_AutonomousProxy:
-		Role = FString("AutonomousProxy");
-		break;
-	case ROLE_Authority:
-		Role = FString("Authority");
-		break;
-	case ROLE_MAX:
-		break;
-	}
-	const FString RemoteRoleString{FString::Printf(TEXT("Remote Role: %s"), *Role)};
-	SetDisplayText(RemoteRoleString);
-}
-
-void UOverheadWidget::NativeDestruct()
-{
-	RemoveFromParent();
-
-	Super::NativeDestruct();
 }

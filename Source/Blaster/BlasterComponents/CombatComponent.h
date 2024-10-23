@@ -47,6 +47,7 @@ protected:
 	void TraceUnderCrosshairs(FHitResult& TraceHitResult) const;
 
 private:
+	UPROPERTY()
 	TObjectPtr<ABlasterCharacter> Character;
 
 	UPROPERTY(EditAnywhere)

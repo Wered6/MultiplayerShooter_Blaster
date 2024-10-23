@@ -8,20 +8,31 @@
 
 class UTextBlock;
 
+UENUM()
+enum class ENRole : uint8
+{
+	Remote,
+	Local
+};
+
 UCLASS()
 class BLASTER_API UOverheadWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(meta=(BindWidget))
-	TObjectPtr<UTextBlock> DisplayText;
-
-	void SetDisplayText(const FString& TextToDisplay) const;
+	UFUNCTION(BlueprintCallable)
+	void ShowPlayerNetRole(APawn* InPawn, ENRole NetRole) const;
 
 	UFUNCTION(BlueprintCallable)
-	void ShowPlayerNetRole(APawn* InPawn) const;
+	void ShowPlayerName(APawn* InPawn) const;
 
 protected:
 	virtual void NativeDestruct() override;
+
+private:
+	void SetDisplayText(const FString& TextToDisplay) const;
+
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UTextBlock> DisplayText;
 };

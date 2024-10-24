@@ -16,7 +16,6 @@ class BLASTER_API UBlasterAnimInstance : public UAnimInstance
 	GENERATED_BODY()
 
 public:
-	// todo crouch footsep sounds, play them only for the locally controlled player
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 

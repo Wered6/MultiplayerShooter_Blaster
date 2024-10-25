@@ -41,24 +41,42 @@ void UCombatComponent::BeginPlay()
 		UE_LOG(LogTemp, Warning, TEXT("%s|Character is nullptr"), *FString(__FUNCTION__))
 		return;
 	}
-	if (!Character->Controller)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("%s|Character->Controller is nullptr"), *FString(__FUNCTION__))
-		return;
-	}
 #pragma endregion
 
 	Character->GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
 
-	Controller = Cast<ABlasterPlayerController>(Character->Controller);
-	HUD = Cast<ABlasterHUD>(Controller->GetHUD());
+	// We do this only in autonomous proxy
+	if (Character->IsLocallyControlled())
+	{
+#pragma region Nullchecks
+		if (!Character->Controller)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("%s|Character->Controller is nullptr"), *FString(__FUNCTION__))
+			return;
+		}
+#pragma endregion
+		Controller = Cast<ABlasterPlayerController>(Character->Controller);
+		HUD = Cast<ABlasterHUD>(Controller->GetHUD());
+	}
 }
 
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	SetHUDCrosshairs(DeltaTime);
+#pragma region Nullchecks
+	if (!Character)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|Character is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+#pragma endregion
+
+	// We do this only in autonomous proxy
+	if (Character->IsLocallyControlled())
+	{
+		SetHUDCrosshairs(DeltaTime);
+	}
 }
 
 void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
@@ -227,11 +245,6 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult) const
 void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 {
 #pragma region Nullchecks
-	if (!EquippedWeapon)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("%s|EquippedWeapon is nullptr"), *FString(__FUNCTION__))
-		return;
-	}
 	if (!HUD)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("%s|HUD is nullptr"), *FString(__FUNCTION__))
@@ -245,16 +258,16 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 		HUDPackage.CrosshairsCenter = EquippedWeapon->CrosshairsCenter;
 		HUDPackage.CrosshairsLeft = EquippedWeapon->CrosshairsLeft;
 		HUDPackage.CrosshairsRight = EquippedWeapon->CrosshairsRight;
-		HUDPackage.CrosshairsBottom = EquippedWeapon->CrosshairsBottom;
 		HUDPackage.CrosshairsTop = EquippedWeapon->CrosshairsTop;
+		HUDPackage.CrosshairsBottom = EquippedWeapon->CrosshairsBottom;
 	}
 	else
 	{
 		HUDPackage.CrosshairsCenter = nullptr;
 		HUDPackage.CrosshairsLeft = nullptr;
 		HUDPackage.CrosshairsRight = nullptr;
-		HUDPackage.CrosshairsBottom = nullptr;
 		HUDPackage.CrosshairsTop = nullptr;
+		HUDPackage.CrosshairsBottom = nullptr;
 	}
 	HUD->SetHUDPackage(HUDPackage);
 }

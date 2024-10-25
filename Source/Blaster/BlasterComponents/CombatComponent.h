@@ -8,6 +8,8 @@
 
 #define TRACE_LENGTH 80000.f
 
+class ABlasterHUD;
+class ABlasterPlayerController;
 class AWeapon;
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
@@ -46,9 +48,15 @@ protected:
 
 	void TraceUnderCrosshairs(FHitResult& TraceHitResult) const;
 
+	void SetHUDCrosshairs(float DeltaTime);
+
 private:
 	UPROPERTY()
 	TObjectPtr<ABlasterCharacter> Character;
+	UPROPERTY()
+	TObjectPtr<ABlasterPlayerController> Controller;
+	UPROPERTY()
+	TObjectPtr<ABlasterHUD> HUD;
 
 	UPROPERTY(EditAnywhere)
 	float BaseWalkSpeed;

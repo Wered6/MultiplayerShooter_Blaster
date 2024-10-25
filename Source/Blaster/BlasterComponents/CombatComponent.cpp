@@ -3,6 +3,8 @@
 
 #include "CombatComponent.h"
 #include "Blaster/Character/BlasterCharacter.h"
+#include "Blaster/HUD/BlasterHUD.h"
+#include "Blaster/PlayerController/BlasterPlayerController.h"
 #include "Blaster/Weapon/Weapon.h"
 #include "Components/SphereComponent.h"
 #include "Engine/SkeletalMeshSocket.h"
@@ -39,14 +41,24 @@ void UCombatComponent::BeginPlay()
 		UE_LOG(LogTemp, Warning, TEXT("%s|Character is nullptr"), *FString(__FUNCTION__))
 		return;
 	}
+	if (!Character->Controller)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|Character->Controller is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
 #pragma endregion
 
 	Character->GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
+
+	Controller = Cast<ABlasterPlayerController>(Character->Controller);
+	HUD = Cast<ABlasterHUD>(Controller->GetHUD());
 }
 
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	SetHUDCrosshairs(DeltaTime);
 }
 
 void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
@@ -210,4 +222,39 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult) const
 			ECC_Visibility
 		);
 	}
+}
+
+void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
+{
+#pragma region Nullchecks
+	if (!EquippedWeapon)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|EquippedWeapon is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+	if (!HUD)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|HUD is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+#pragma endregion
+
+	FHUDPackage HUDPackage;
+	if (EquippedWeapon)
+	{
+		HUDPackage.CrosshairsCenter = EquippedWeapon->CrosshairsCenter;
+		HUDPackage.CrosshairsLeft = EquippedWeapon->CrosshairsLeft;
+		HUDPackage.CrosshairsRight = EquippedWeapon->CrosshairsRight;
+		HUDPackage.CrosshairsBottom = EquippedWeapon->CrosshairsBottom;
+		HUDPackage.CrosshairsTop = EquippedWeapon->CrosshairsTop;
+	}
+	else
+	{
+		HUDPackage.CrosshairsCenter = nullptr;
+		HUDPackage.CrosshairsLeft = nullptr;
+		HUDPackage.CrosshairsRight = nullptr;
+		HUDPackage.CrosshairsBottom = nullptr;
+		HUDPackage.CrosshairsTop = nullptr;
+	}
+	HUD->SetHUDPackage(HUDPackage);
 }

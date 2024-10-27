@@ -37,6 +37,12 @@ public:
 
 #pragma region Camera
 
+public:
+	FORCEINLINE UCameraComponent* GetFollowCamera() const
+	{
+		return FollowCamera;
+	}
+
 private:
 	UPROPERTY(VisibleAnywhere, Category=Camera)
 	TObjectPtr<USpringArmComponent> CameraBoom;

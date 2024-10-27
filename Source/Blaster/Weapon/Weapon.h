@@ -53,9 +53,19 @@ public:
 
 	virtual void Fire(const FVector& HitTarget);
 
+	FORCEINLINE float GetZoomedFOV() const
+	{
+		return ZoomedFOV;
+	}
+
+	FORCEINLINE float GetZoomInterpSpeed() const
+	{
+		return ZoomInterpSpeed;
+	}
+
 	/*
- * Textures fot the weapon crosshairs
- */
+	* Textures fot the weapon crosshairs
+	*/
 	UPROPERTY(EditAnywhere, Category=Crosshairs)
 	TObjectPtr<UTexture2D> CrosshairsCenter;
 	UPROPERTY(EditAnywhere, Category=Crosshairs)
@@ -103,4 +113,12 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<ACasing> CasingClass;
+
+	/*
+	 * Zoomed FOV while aiming
+	 */
+	UPROPERTY(EditAnywhere)
+	float ZoomedFOV{30.f};
+	UPROPERTY(EditAnywhere)
+	float ZoomInterpSpeed{20.f};
 };

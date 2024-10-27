@@ -6,6 +6,7 @@
 #include "Blaster/HUD/BlasterHUD.h"
 #include "Blaster/PlayerController/BlasterPlayerController.h"
 #include "Blaster/Weapon/Weapon.h"
+#include "Camera/CameraComponent.h"
 #include "Components/SphereComponent.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -21,8 +22,6 @@ UCombatComponent::UCombatComponent()
 
 	BaseWalkSpeed = 600.f;
 	AimWalkSpeed = 450.f;
-	CrosshairVelocityFactor = 0.f;
-	CrosshairInAirFactor = 0.f;
 }
 
 void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -43,9 +42,16 @@ void UCombatComponent::BeginPlay()
 		UE_LOG(LogTemp, Warning, TEXT("%s|Character is nullptr"), *FString(__FUNCTION__))
 		return;
 	}
+	if (!Character->GetFollowCamera())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|Character->GetFollowCamera() is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
 #pragma endregion
 
 	Character->GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
+	DefaultFOV = Character->GetFollowCamera()->FieldOfView;
+	CurrentFOV = DefaultFOV;
 
 	// We do this only in autonomous proxy
 	if (Character->IsLocallyControlled())
@@ -77,10 +83,12 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	// We do this only in autonomous proxy
 	if (Character->IsLocallyControlled())
 	{
-		SetHUDCrosshairs(DeltaTime);
 		FHitResult HitResult;
 		TraceUnderCrosshairs(HitResult);
 		HitTarget = HitResult.ImpactPoint;
+
+		SetHUDCrosshairs(DeltaTime);
+		InterpFOV(DeltaTime);
 	}
 }
 
@@ -300,4 +308,36 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 
 	HUDPackage.CrosshairSpread = CrosshairVelocityFactor + CrosshairInAirFactor;
 	HUD->SetHUDPackage(HUDPackage);
+}
+
+void UCombatComponent::InterpFOV(float DeltaTime)
+{
+#pragma region Nullchecks
+	if (!Character)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|Character is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+	if (!Character->GetFollowCamera())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|Character->GetFollowCamera() is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+#pragma endregion
+
+	if (!EquippedWeapon)
+	{
+		return;
+	}
+
+	if (bAiming)
+	{
+		CurrentFOV = FMath::FInterpTo(CurrentFOV, EquippedWeapon->GetZoomedFOV(), DeltaTime, EquippedWeapon->GetZoomInterpSpeed());
+	}
+	else
+	{
+		CurrentFOV = FMath::FInterpTo(CurrentFOV, DefaultFOV, DeltaTime, ZoomInterpSpeed);
+	}
+
+	Character->GetFollowCamera()->SetFieldOfView(CurrentFOV);
 }

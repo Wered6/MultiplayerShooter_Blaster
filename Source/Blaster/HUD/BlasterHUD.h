@@ -22,6 +22,8 @@ public:
 	TObjectPtr<UTexture2D> CrosshairsTop;
 	UPROPERTY()
 	TObjectPtr<UTexture2D> CrosshairsBottom;
+
+	float CrosshairSpread;
 };
 
 UCLASS()
@@ -38,7 +40,10 @@ public:
 	}
 
 private:
-	void DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter);
+	void DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread);
 
 	FHUDPackage HUDPackage;
+
+	UPROPERTY(EditAnywhere)
+	float CrosshairSpreadMax{16.f};
 };

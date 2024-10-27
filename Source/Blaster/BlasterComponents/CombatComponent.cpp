@@ -21,6 +21,8 @@ UCombatComponent::UCombatComponent()
 
 	BaseWalkSpeed = 600.f;
 	AimWalkSpeed = 450.f;
+	CrosshairVelocityFactor = 0.f;
+	CrosshairInAirFactor = 0.f;
 }
 
 void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -250,6 +252,11 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 		UE_LOG(LogTemp, Warning, TEXT("%s|HUD is nullptr"), *FString(__FUNCTION__))
 		return;
 	}
+	if (!Character)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|Character is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
 #pragma endregion
 
 	FHUDPackage HUDPackage;
@@ -269,5 +276,25 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 		HUDPackage.CrosshairsTop = nullptr;
 		HUDPackage.CrosshairsBottom = nullptr;
 	}
+	// Calculate crosshair spread
+	// if crouched [0, 300] -> [0, 1] else [0, 600] -> [0, 1]
+	const FVector2D SpeedRange(0.f, Character->bIsCrouched
+		                                    ? Character->GetCharacterMovement()->MaxWalkSpeedCrouched
+		                                    : Character->GetCharacterMovement()->MaxWalkSpeed);
+	const FVector2D VelocityMultiplierRange(0.f, 1.f);
+	FVector Velocity = Character->GetVelocity();
+	Velocity.Z = 0.f;
+	CrosshairVelocityFactor = FMath::GetMappedRangeValueClamped(SpeedRange, VelocityMultiplierRange, Velocity.Size());
+
+	if (Character->GetCharacterMovement()->IsFalling())
+	{
+		CrosshairInAirFactor = FMath::FInterpTo(CrosshairInAirFactor, 2.25f, DeltaTime, 2.25f);
+	}
+	else
+	{
+		CrosshairInAirFactor = FMath::FInterpTo(CrosshairInAirFactor, 0.f, DeltaTime, 30.f);
+	}
+
+	HUDPackage.CrosshairSpread = CrosshairVelocityFactor + CrosshairInAirFactor;
 	HUD->SetHUDPackage(HUDPackage);
 }

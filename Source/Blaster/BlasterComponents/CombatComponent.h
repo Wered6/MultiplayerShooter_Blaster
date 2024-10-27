@@ -71,4 +71,10 @@ private:
 
 	UPROPERTY(Replicated)
 	bool bAiming;
+
+	/*
+	 * HUD and crosshairs
+	 */
+	float CrosshairVelocityFactor;
+	float CrosshairInAirFactor;
 };

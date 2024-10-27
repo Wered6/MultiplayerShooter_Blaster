@@ -89,12 +89,12 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 		UE_LOG(LogTemp, Warning, TEXT("%s|Character is nullptr"), *FString(__FUNCTION__))
 		return;
 	}
+#pragma endregion
+
 	if (!WeaponToEquip)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("%s|WeaponToEquip is nullptr"), *FString(__FUNCTION__))
 		return;
 	}
-#pragma endregion
 
 	EquippedWeapon = WeaponToEquip;
 	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
@@ -189,12 +189,12 @@ void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& T
 		UE_LOG(LogTemp, Warning, TEXT("%s|Character is nullptr"), *FString(__FUNCTION__))
 		return;
 	}
+#pragma endregion
+
 	if (!EquippedWeapon)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("%s|EquippedWeapon is nullptr"), *FString(__FUNCTION__))
 		return;
 	}
-#pragma endregion
 
 	Character->PlayFireMontage(bAiming);
 	EquippedWeapon->Fire(TraceHitTarget);
@@ -279,8 +279,8 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 	// Calculate crosshair spread
 	// if crouched [0, 300] -> [0, 1] else [0, 600] -> [0, 1]
 	const FVector2D SpeedRange(0.f, Character->bIsCrouched
-		                                    ? Character->GetCharacterMovement()->MaxWalkSpeedCrouched
-		                                    : Character->GetCharacterMovement()->MaxWalkSpeed);
+		                                ? Character->GetCharacterMovement()->MaxWalkSpeedCrouched
+		                                : Character->GetCharacterMovement()->MaxWalkSpeed);
 	const FVector2D VelocityMultiplierRange(0.f, 1.f);
 	FVector Velocity = Character->GetVelocity();
 	Velocity.Z = 0.f;

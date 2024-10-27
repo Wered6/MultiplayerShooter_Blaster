@@ -351,6 +351,19 @@ void ABlasterCharacter::PostInitializeComponents()
 	Combat->Character = this;
 }
 
+FVector ABlasterCharacter::GetHitTarget() const
+{
+#pragma region Nullchecks
+	if (!Combat)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|Combat is nullptr"), *FString(__FUNCTION__))
+		return FVector();
+	}
+#pragma endregion
+
+	return Combat->HitTarget;
+}
+
 // Gets called only on server
 void ABlasterCharacter::SetOverlappingWeapon(AWeapon* Weapon)
 {

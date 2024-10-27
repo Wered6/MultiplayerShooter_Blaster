@@ -136,6 +136,8 @@ private:
 #pragma region Weapon
 
 public:
+	FVector GetHitTarget() const;
+
 	void SetOverlappingWeapon(AWeapon* Weapon);
 
 	bool IsWeaponEquipped() const;

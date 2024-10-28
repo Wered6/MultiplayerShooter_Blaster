@@ -40,6 +40,7 @@ protected:
 
 	UFUNCTION()
 	void OnRep_EquippedWeapon() const;
+	void Fire();
 
 	void FireButtonPressed(const bool bPressed);
 	UFUNCTION(Server, Reliable)
@@ -53,6 +54,9 @@ protected:
 
 private:
 	void InterpFOV(float DeltaTime);
+
+	void StartFireTimer();
+	void FireTimerFinished();
 
 	UPROPERTY()
 	TObjectPtr<ABlasterCharacter> Character;
@@ -100,4 +104,11 @@ private:
 	float CurrentFOV{};
 	UPROPERTY(EditAnywhere, Category=Combat)
 	float ZoomInterpSpeed{20.f};
+
+	/*
+	 * Automatic fire
+	 */
+	FTimerHandle FireTimer;
+
+	bool bCanFire{true};
 };

@@ -77,6 +77,14 @@ public:
 	UPROPERTY(EditAnywhere, Category=Crosshairs)
 	TObjectPtr<UTexture2D> CrosshairsBottom;
 
+	/*
+	 * Automatic fire
+	 */
+	UPROPERTY(EditAnywhere, Category=Combat)
+	float FireDelay{0.15f};
+	UPROPERTY(EditAnywhere, Category=Combat)
+	bool bAutomatic{true};
+
 protected:
 	UFUNCTION()
 	virtual void OnSphereOverlap(UPrimitiveComponent* OverlappedComponent,

@@ -171,7 +171,7 @@ public:
 		return TurningInPlace;
 	}
 
-	void PlayFireMontage(bool bAiming);
+	void PlayFireMontage(const bool bAiming) const;
 
 protected:
 	void AimOffset(float DeltaTime);
@@ -198,4 +198,15 @@ private:
 	TObjectPtr<UAnimMontage> FireWeaponMontage;
 
 #pragma endregion
+
+public:
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastHit();
+
+protected:
+	void PlayHitReactMontage() const;
+
+private:
+	UPROPERTY(EditAnywhere, Category=Combat)
+	TObjectPtr<UAnimMontage> HitReactMontage;
 };

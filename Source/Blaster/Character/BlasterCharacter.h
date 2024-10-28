@@ -45,6 +45,11 @@ public:
 	}
 
 private:
+	void HideCameraIfCharacterClose() const;
+
+	UPROPERTY(EditAnywhere)
+	float CameraThreshold{200.f};
+
 	UPROPERTY(VisibleAnywhere, Category=Camera)
 	TObjectPtr<USpringArmComponent> CameraBoom;
 

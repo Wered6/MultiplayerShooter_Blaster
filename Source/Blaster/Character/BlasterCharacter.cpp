@@ -88,6 +88,55 @@ void ABlasterCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	AimOffset(DeltaTime);
+	HideCameraIfCharacterClose();
+}
+
+void ABlasterCharacter::HideCameraIfCharacterClose() const
+{
+#pragma region Nullchecks
+	if (!FollowCamera)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|FollowCamera is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+	if (!Combat)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|Combat is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+	if (!GetMesh())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|GetMesh() is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+#pragma endregion
+
+	if (!IsLocallyControlled() || !Combat->EquippedWeapon)
+	{
+		return;
+	}
+
+	USkeletalMeshComponent* WeaponMesh{Combat->EquippedWeapon->GetWeaponMesh()};
+
+#pragma region Nullchecks
+	if (!WeaponMesh)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|WeaponMesh is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+#pragma endregion
+
+	const float CameraActorDistance{static_cast<float>((FollowCamera->GetComponentLocation() - GetActorLocation()).Size())};
+	if (CameraActorDistance < CameraThreshold)
+	{
+		GetMesh()->SetVisibility(false);
+		WeaponMesh->bOwnerNoSee = true;
+	}
+	else
+	{
+		GetMesh()->SetVisibility(true);
+		WeaponMesh->bOwnerNoSee = false;
+	}
 }
 
 void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

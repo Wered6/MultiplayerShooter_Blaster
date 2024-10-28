@@ -230,6 +230,11 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 		UE_LOG(LogTemp, Warning, TEXT("%s|GEngine->GameViewport is nullptr"), *FString(__FUNCTION__))
 		return;
 	}
+	if (!Character)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|Character is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
 #pragma endregion
 
 	GEngine->GameViewport->GetViewportSize(ViewportSize);
@@ -247,7 +252,11 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 
 	if (bScreenToWorld)
 	{
-		const FVector Start{CrosshairWorldPosition};
+		FVector Start{CrosshairWorldPosition};
+
+		const float DistanceToCharacter{static_cast<float>((Character->GetActorLocation() - Start).Size())};
+		Start += CrosshairWorldDirection * (DistanceToCharacter + 100.f);
+
 		const FVector End{Start + CrosshairWorldDirection * TRACE_LENGTH};
 
 		GetWorld()->LineTraceSingleByChannel(

@@ -266,14 +266,7 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 			ECC_Visibility
 		);
 
-		if (TraceHitResult.GetActor() && TraceHitResult.GetActor()->Implements<UInteractWithCrosshairsInterface>())
-		{
-			HUDPackage.CrosshairsColor = FLinearColor::Red;
-		}
-		else
-		{
-			HUDPackage.CrosshairsColor = FLinearColor::White;
-		}
+		bOnTarget = TraceHitResult.GetActor() && TraceHitResult.GetActor()->Implements<UInteractWithCrosshairsInterface>();
 	}
 }
 
@@ -338,12 +331,24 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 
 	CrosshairShootingFactor = FMath::FInterpTo(CrosshairShootingFactor, 0.f, DeltaTime, 40.f);
 
+	if (bOnTarget)
+	{
+		HUDPackage.CrosshairsColor = FLinearColor::Red;
+		CrosshairAimAtEnemyFactor = FMath::FInterpTo(CrosshairAimAtEnemyFactor, 0.15f, DeltaTime, 20.f);
+	}
+	else
+	{
+		HUDPackage.CrosshairsColor = FLinearColor::White;
+		CrosshairAimAtEnemyFactor = FMath::FInterpTo(CrosshairAimAtEnemyFactor, 0.f, DeltaTime, 20.f);
+	}
+
 	HUDPackage.CrosshairSpread =
 		0.5f +
 		CrosshairVelocityFactor +
 		CrosshairInAirFactor -
 		CrosshairAimFactor +
-		CrosshairShootingFactor;
+		CrosshairShootingFactor -
+		CrosshairAimAtEnemyFactor;
 
 	HUD->SetHUDPackage(HUDPackage);
 }

@@ -82,10 +82,13 @@ private:
 	float CrosshairInAirFactor{};
 	float CrosshairAimFactor{};
 	float CrosshairShootingFactor{};
+	float CrosshairAimAtEnemyFactor{};
 
 	FVector HitTarget;
 
 	FHUDPackage HUDPackage{};
+
+	bool bOnTarget{};
 
 	/*
 	 * Aiming and FOV

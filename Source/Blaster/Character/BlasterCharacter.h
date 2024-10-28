@@ -172,6 +172,7 @@ public:
 	}
 
 	void PlayFireMontage(const bool bAiming) const;
+	void CalculateAO_Pitch();
 
 protected:
 	void AimOffset(float DeltaTime);
@@ -203,10 +204,28 @@ public:
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastHit();
 
+	FORCEINLINE bool ShouldRotateRootBone() const
+	{
+		return bRotateRootBone;
+	}
+
+	virtual void OnRep_ReplicatedMovement() override;
+
 protected:
 	void PlayHitReactMontage() const;
 
+	void SimProxiesTurn();
+
 private:
+	float CalculateSpeed() const;
+
 	UPROPERTY(EditAnywhere, Category=Combat)
 	TObjectPtr<UAnimMontage> HitReactMontage;
+
+	bool bRotateRootBone{};
+	float TurnThreshold{0.5f};
+	FRotator ProxyRotationLastFrame{};
+	FRotator ProxyRotation{};
+	float ProxyYaw{};
+	float TimeSinceLastMovementReplication{};
 };

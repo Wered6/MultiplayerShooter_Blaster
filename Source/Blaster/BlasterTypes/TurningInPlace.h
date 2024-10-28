@@ -5,9 +5,9 @@
 UENUM(BlueprintType)
 enum class ETurningInPlace : uint8
 {
-	ETTP_Left UMETA(DisplayName = "Turning Left"),
-	ETTP_Right UMETA(DisplayName = "Turning Right"),
-	ETTP_NotTurning UMETA(DisplayName = "Not Turning"),
+	ETIP_Left UMETA(DisplayName = "Turning Left"),
+	ETIP_Right UMETA(DisplayName = "Turning Right"),
+	ETIP_NotTurning UMETA(DisplayName = "Not Turning"),
 
-	ETTP_MAX UMETA(DisplayName = "DefaultMAX")
+	ETIP_MAX UMETA(DisplayName = "DefaultMAX")
 };

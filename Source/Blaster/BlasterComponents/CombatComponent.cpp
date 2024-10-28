@@ -3,7 +3,6 @@
 
 #include "CombatComponent.h"
 #include "Blaster/Character/BlasterCharacter.h"
-#include "Blaster/HUD/BlasterHUD.h"
 #include "Blaster/PlayerController/BlasterPlayerController.h"
 #include "Blaster/Weapon/Weapon.h"
 #include "Camera/CameraComponent.h"
@@ -216,7 +215,7 @@ void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& T
 	EquippedWeapon->Fire(TraceHitTarget);
 }
 
-void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult) const
+void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 {
 	FVector2D ViewportSize;
 
@@ -257,6 +256,15 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult) const
 			End,
 			ECC_Visibility
 		);
+
+		if (TraceHitResult.GetActor() && TraceHitResult.GetActor()->Implements<UInteractWithCrosshairsInterface>())
+		{
+			HUDPackage.CrosshairsColor = FLinearColor::Red;
+		}
+		else
+		{
+			HUDPackage.CrosshairsColor = FLinearColor::White;
+		}
 	}
 }
 
@@ -275,7 +283,6 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 	}
 #pragma endregion
 
-	FHUDPackage HUDPackage;
 	if (EquippedWeapon)
 	{
 		HUDPackage.CrosshairsCenter = EquippedWeapon->CrosshairsCenter;
@@ -328,7 +335,7 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 		CrosshairInAirFactor -
 		CrosshairAimFactor +
 		CrosshairShootingFactor;
-	
+
 	HUD->SetHUDPackage(HUDPackage);
 }
 

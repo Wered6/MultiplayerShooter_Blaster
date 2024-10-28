@@ -24,6 +24,8 @@ public:
 	TObjectPtr<UTexture2D> CrosshairsBottom;
 
 	float CrosshairSpread;
+
+	FLinearColor CrosshairsColor;
 };
 
 UCLASS()
@@ -40,7 +42,7 @@ public:
 	}
 
 private:
-	void DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread);
+	void DrawCrosshair(UTexture2D* Texture, const FVector2D ViewportCenter, const FVector2D Spread, const FLinearColor CrosshairColor);
 
 	FHUDPackage HUDPackage;
 

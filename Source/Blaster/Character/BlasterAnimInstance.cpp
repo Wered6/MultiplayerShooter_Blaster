@@ -85,8 +85,8 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 			bLocallyControlled = true;
 			const FTransform RightHandTransform{EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("Hand_R"), RTS_World)};
 			const FVector RightHandLocation{RightHandTransform.GetLocation()};
-			RightHandRotation = UKismetMathLibrary::FindLookAtRotation(RightHandLocation,
-			                                                           RightHandLocation + (RightHandLocation - BlasterCharacter->GetHitTarget()));
+			const FRotator LookAtRotation{UKismetMathLibrary::FindLookAtRotation(RightHandLocation, RightHandLocation + (RightHandLocation - BlasterCharacter->GetHitTarget()))};
+			RightHandRotation = FMath::RInterpTo(RightHandRotation, LookAtRotation, DeltaSeconds, 30.f);
 		}
 	}
 }

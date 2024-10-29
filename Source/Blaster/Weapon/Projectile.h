@@ -30,6 +30,9 @@ protected:
 	UFUNCTION()
 	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
+	UFUNCTION(NetMulticast, Reliable)
+	void MultiCast_OnHit(const bool bCharacterHit);
+
 private:
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UBoxComponent> CollisionBox;
@@ -42,8 +45,11 @@ private:
 
 	TObjectPtr<UParticleSystemComponent> TracerComponent;
 
-	UPROPERTY(EditAnywhere)
 	TObjectPtr<UParticleSystem> ImpactParticles;
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UParticleSystem> ImpactCharacterParticles;
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UParticleSystem> ImpactObstacleParticles;
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<USoundCue> ImpactSound;

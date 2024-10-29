@@ -7,6 +7,7 @@
 #include "Components/BoxComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
 #include "Sound/SoundCue.h"
 
 AProjectile::AProjectile()
@@ -81,11 +82,33 @@ void AProjectile::Destroyed()
 
 void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
+#pragma region Nullchecks
+	if (!ImpactCharacterParticles)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|ImpactParticleCharacter is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+	if (!ImpactObstacleParticles)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|ImpactParticleNonCharacter is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+#pragma endregion
+
 	ABlasterCharacter* BlasterCharacter{Cast<ABlasterCharacter>(OtherActor)};
+	bool bCharacterHit{false};
 	if (BlasterCharacter)
 	{
 		BlasterCharacter->MulticastHit();
+		bCharacterHit = true;
+		ImpactParticles = ImpactCharacterParticles;
 	}
 
+	MultiCast_OnHit(bCharacterHit);
+}
+
+void AProjectile::MultiCast_OnHit_Implementation(const bool bCharacterHit)
+{
+	ImpactParticles = bCharacterHit ? ImpactCharacterParticles : ImpactObstacleParticles;
 	Destroy();
 }

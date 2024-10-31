@@ -73,6 +73,7 @@ void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME_CONDITION(ABlasterCharacter, OverlappingWeapon, COND_OwnerOnly);
+	DOREPLIFETIME(ABlasterCharacter, Health);
 }
 
 void ABlasterCharacter::BeginPlay()
@@ -694,6 +695,10 @@ float ABlasterCharacter::CalculateSpeed() const
 	Velocity.Z = 0.f;
 
 	return Velocity.Size();
+}
+
+void ABlasterCharacter::OnRep_Health()
+{
 }
 
 void ABlasterCharacter::MulticastHit_Implementation()

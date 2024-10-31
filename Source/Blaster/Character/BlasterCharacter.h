@@ -228,4 +228,17 @@ private:
 	FRotator ProxyRotation{};
 	float ProxyYaw{};
 	float TimeSinceLastMovementReplication{};
+
+#pragma region PlayerStats
+
+private:
+	UFUNCTION()
+	void OnRep_Health();
+
+	UPROPERTY(EditAnywhere, Category="Player Stats")
+	float MaxHealth{100.f};
+	UPROPERTY(ReplicatedUsing=OnRep_Health, VisibleAnywhere, Category="Player Stats")
+	float Health{100.f};
+
+#pragma endregion
 };

@@ -8,6 +8,7 @@
 #include "GameFramework/Character.h"
 #include "BlasterCharacter.generated.h"
 
+class ABlasterPlayerController;
 enum class ETurningInPlace : uint8;
 class UCombatComponent;
 class AWeapon;
@@ -239,6 +240,9 @@ private:
 	float MaxHealth{100.f};
 	UPROPERTY(ReplicatedUsing=OnRep_Health, VisibleAnywhere, Category="Player Stats")
 	float Health{100.f};
+
+	UPROPERTY()
+	TObjectPtr<ABlasterPlayerController> BlasterPlayerController;
 
 #pragma endregion
 };

@@ -7,6 +7,7 @@
 #include "Blaster/Blaster.h"
 #include "Blaster/BlasterComponents/CombatComponent.h"
 #include "Blaster/BlasterTypes/TurningInPlace.h"
+#include "Blaster/PlayerController/BlasterPlayerController.h"
 #include "Blaster/Weapon/Weapon.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -80,9 +81,24 @@ void ABlasterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (HasAuthority() && IsLocallyControlled())
+	if (IsLocallyControlled())
 	{
-		ShowPlayerName();
+		BlasterPlayerController = Cast<ABlasterPlayerController>(Controller);
+
+#pragma region Nullchecks
+		if (!BlasterPlayerController)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("%s|BlasterPlayerController is nullptr"), *FString(__FUNCTION__))
+			return;
+		}
+#pragma endregion
+
+		BlasterPlayerController->SetHUDHealth(Health, MaxHealth);
+		
+		if (HasAuthority())
+		{
+			ShowPlayerName();
+		}
 	}
 }
 

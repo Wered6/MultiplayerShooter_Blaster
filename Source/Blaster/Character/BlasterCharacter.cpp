@@ -85,20 +85,16 @@ void ABlasterCharacter::BeginPlay()
 	{
 		BlasterPlayerController = Cast<ABlasterPlayerController>(Controller);
 
-#pragma region Nullchecks
-		if (!BlasterPlayerController)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("%s|BlasterPlayerController is nullptr"), *FString(__FUNCTION__))
-			return;
-		}
-#pragma endregion
-
-		BlasterPlayerController->SetHUDHealth(Health, MaxHealth);
-		
+		UpdateHUDHealth();
 		if (HasAuthority())
 		{
 			ShowPlayerName();
 		}
+	}
+
+	if (HasAuthority())
+	{
+		OnTakeAnyDamage.AddDynamic(this, &ABlasterCharacter::ReceiveDamage);
 	}
 }
 
@@ -705,6 +701,29 @@ void ABlasterCharacter::SimProxiesTurn()
 	TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 }
 
+void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser)
+{
+	Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
+	if (IsLocallyControlled())
+	{
+		UpdateHUDHealth();
+	}
+	PlayHitReactMontage();
+}
+
+void ABlasterCharacter::UpdateHUDHealth() const
+{
+#pragma region Nullchecks
+	if (!BlasterPlayerController)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|BlasterPlayerController is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+#pragma endregion
+
+	BlasterPlayerController->SetHUDHealth(Health, MaxHealth);
+}
+
 float ABlasterCharacter::CalculateSpeed() const
 {
 	FVector Velocity = GetVelocity();
@@ -713,11 +732,11 @@ float ABlasterCharacter::CalculateSpeed() const
 	return Velocity.Size();
 }
 
-void ABlasterCharacter::OnRep_Health()
+void ABlasterCharacter::OnRep_Health() const
 {
-}
-
-void ABlasterCharacter::MulticastHit_Implementation()
-{
+	if (IsLocallyControlled())
+	{
+		UpdateHUDHealth();
+	}
 	PlayHitReactMontage();
 }

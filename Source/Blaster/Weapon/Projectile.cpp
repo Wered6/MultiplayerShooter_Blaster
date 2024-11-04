@@ -94,11 +94,10 @@ void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimi
 	}
 #pragma endregion
 
-	ABlasterCharacter* BlasterCharacter{Cast<ABlasterCharacter>(OtherActor)};
+	const ABlasterCharacter* BlasterCharacter{Cast<ABlasterCharacter>(OtherActor)};
 	bool bCharacterHit{false};
 	if (BlasterCharacter)
 	{
-		BlasterCharacter->MulticastHit();
 		bCharacterHit = true;
 		ImpactParticles = ImpactCharacterParticles;
 	}

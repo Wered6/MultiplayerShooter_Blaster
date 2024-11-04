@@ -33,6 +33,9 @@ protected:
 	UFUNCTION(NetMulticast, Reliable)
 	void MultiCast_OnHit(const bool bCharacterHit);
 
+	UPROPERTY(EditAnywhere)
+	float Damage{20.f};
+
 private:
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UBoxComponent> CollisionBox;

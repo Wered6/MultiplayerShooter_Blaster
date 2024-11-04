@@ -202,9 +202,6 @@ private:
 #pragma endregion
 
 public:
-	UFUNCTION(NetMulticast, Unreliable)
-	void MulticastHit();
-
 	FORCEINLINE bool ShouldRotateRootBone() const
 	{
 		return bRotateRootBone;
@@ -216,6 +213,11 @@ protected:
 	void PlayHitReactMontage() const;
 
 	void SimProxiesTurn();
+
+	UFUNCTION()
+	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser);
+
+	void UpdateHUDHealth() const;
 
 private:
 	float CalculateSpeed() const;
@@ -234,7 +236,7 @@ private:
 
 private:
 	UFUNCTION()
-	void OnRep_Health();
+	void OnRep_Health() const;
 
 	UPROPERTY(EditAnywhere, Category="Player Stats")
 	float MaxHealth{100.f};

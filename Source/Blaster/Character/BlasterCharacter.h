@@ -209,6 +209,8 @@ public:
 
 	virtual void OnRep_ReplicatedMovement() override;
 
+	void Elim();
+
 protected:
 	void PlayHitReactMontage() const;
 

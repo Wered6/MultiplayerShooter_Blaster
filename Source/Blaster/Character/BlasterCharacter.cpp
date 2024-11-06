@@ -7,6 +7,7 @@
 #include "Blaster/Blaster.h"
 #include "Blaster/BlasterComponents/CombatComponent.h"
 #include "Blaster/BlasterTypes/TurningInPlace.h"
+#include "Blaster/GameMode/BlasterGameMode.h"
 #include "Blaster/PlayerController/BlasterPlayerController.h"
 #include "Blaster/Weapon/Weapon.h"
 #include "Camera/CameraComponent.h"
@@ -619,6 +620,10 @@ void ABlasterCharacter::OnRep_ReplicatedMovement()
 	TimeSinceLastMovementReplication = 0.f;
 }
 
+void ABlasterCharacter::Elim()
+{
+}
+
 void ABlasterCharacter::PlayHitReactMontage() const
 {
 #pragma region Nullchecks
@@ -709,6 +714,32 @@ void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const 
 		UpdateHUDHealth();
 	}
 	PlayHitReactMontage();
+
+	if (Health == 0.f)
+	{
+		ABlasterGameMode* BlasterGameMode{GetWorld()->GetAuthGameMode<ABlasterGameMode>()};
+		ABlasterPlayerController* AttackerController{Cast<ABlasterPlayerController>(InstigatorController)};
+
+#pragma region Nullchecks
+		if (!BlasterGameMode)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("%s|BlasterGameMode is nullptr"), *FString(__FUNCTION__))
+			return;
+		}
+		if (!BlasterPlayerController)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("%s|BlasterPlayerController is nullptr"), *FString(__FUNCTION__))
+			return;
+		}
+		if (!AttackerController)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("%s|AttackerController is nullptr"), *FString(__FUNCTION__))
+			return;
+		}
+#pragma endregion
+
+		BlasterGameMode->PlayerEliminated(this, BlasterPlayerController, AttackerController);
+	}
 }
 
 void ABlasterCharacter::UpdateHUDHealth() const

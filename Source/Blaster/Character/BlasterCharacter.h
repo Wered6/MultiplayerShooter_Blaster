@@ -209,7 +209,14 @@ public:
 
 	virtual void OnRep_ReplicatedMovement() override;
 
+	UFUNCTION(NetMulticast, Reliable)
 	void Elim();
+	void PlayElimMontage() const;
+
+	FORCEINLINE bool IsElimmed() const
+	{
+		return bElimmed;
+	}
 
 protected:
 	void PlayHitReactMontage() const;
@@ -233,6 +240,11 @@ private:
 	FRotator ProxyRotation{};
 	float ProxyYaw{};
 	float TimeSinceLastMovementReplication{};
+
+	UPROPERTY(EditAnywhere, Category=Combat)
+	TObjectPtr<UAnimMontage> ElimMontage;
+
+	bool bElimmed{false};
 
 #pragma region PlayerStats
 

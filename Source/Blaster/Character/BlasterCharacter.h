@@ -209,15 +209,6 @@ public:
 
 	virtual void OnRep_ReplicatedMovement() override;
 
-	UFUNCTION(NetMulticast, Reliable)
-	void Elim();
-	void PlayElimMontage() const;
-
-	FORCEINLINE bool IsElimmed() const
-	{
-		return bElimmed;
-	}
-
 protected:
 	void PlayHitReactMontage() const;
 
@@ -241,11 +232,6 @@ private:
 	float ProxyYaw{};
 	float TimeSinceLastMovementReplication{};
 
-	UPROPERTY(EditAnywhere, Category=Combat)
-	TObjectPtr<UAnimMontage> ElimMontage;
-
-	bool bElimmed{false};
-
 #pragma region PlayerStats
 
 private:
@@ -259,6 +245,33 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<ABlasterPlayerController> BlasterPlayerController;
+
+#pragma endregion
+
+#pragma region Elimination
+
+public:
+	void Elim();
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastElim();
+	void PlayElimMontage() const;
+
+	FORCEINLINE bool IsElimmed() const
+	{
+		return bElimmed;
+	}
+
+private:
+	void ElimTimerFinished();
+
+	UPROPERTY(EditAnywhere, Category=Combat)
+	TObjectPtr<UAnimMontage> ElimMontage;
+
+	FTimerHandle ElimTimer;
+	UPROPERTY(EditDefaultsOnly)
+	float ElimDelay{3.f};
+
+	bool bElimmed{false};
 
 #pragma endregion
 };

@@ -620,32 +620,6 @@ void ABlasterCharacter::OnRep_ReplicatedMovement()
 	TimeSinceLastMovementReplication = 0.f;
 }
 
-void ABlasterCharacter::Elim_Implementation()
-{
-	bElimmed = true;
-	PlayElimMontage();
-}
-
-void ABlasterCharacter::PlayElimMontage() const
-{
-	UAnimInstance* AnimInstance{GetMesh()->GetAnimInstance()};
-
-#pragma region Nullchecks
-	if (!AnimInstance)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("%s|AnimInstance is nullptr"), *FString(__FUNCTION__))
-		return;
-	}
-	if (!ElimMontage)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("%s|ElimMontage is nullptr"), *FString(__FUNCTION__))
-		return;
-	}
-#pragma endregion
-
-	AnimInstance->Montage_Play(ElimMontage);
-}
-
 void ABlasterCharacter::PlayHitReactMontage() const
 {
 #pragma region Nullchecks
@@ -787,4 +761,57 @@ void ABlasterCharacter::OnRep_Health() const
 		UpdateHUDHealth();
 	}
 	PlayHitReactMontage();
+}
+
+void ABlasterCharacter::Elim()
+{
+	MulticastElim();
+
+	GetWorldTimerManager().SetTimer(
+		ElimTimer,
+		this,
+		&ABlasterCharacter::ElimTimerFinished,
+		ElimDelay
+	);
+}
+
+void ABlasterCharacter::MulticastElim_Implementation()
+{
+	bElimmed = true;
+	PlayElimMontage();
+}
+
+void ABlasterCharacter::PlayElimMontage() const
+{
+	UAnimInstance* AnimInstance{GetMesh()->GetAnimInstance()};
+
+#pragma region Nullchecks
+	if (!AnimInstance)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|AnimInstance is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+	if (!ElimMontage)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|ElimMontage is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+#pragma endregion
+
+	AnimInstance->Montage_Play(ElimMontage);
+}
+
+void ABlasterCharacter::ElimTimerFinished()
+{
+	ABlasterGameMode* BlasterGameMode{GetWorld()->GetAuthGameMode<ABlasterGameMode>()};
+
+#pragma region Nullchecks
+	if (!BlasterGameMode)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|BlasterGameMode is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+#pragma endregion
+
+	BlasterGameMode->RequestRespawn(this, Controller);
 }

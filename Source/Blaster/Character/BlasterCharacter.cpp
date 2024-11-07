@@ -52,6 +52,8 @@ ABlasterCharacter::ABlasterCharacter()
 	TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 	NetUpdateFrequency = 66.f;
 	MinNetUpdateFrequency = 33.f;
+
+	DissolveTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("DissolveTimelineComponent"));
 }
 
 // Called on clients for all characters
@@ -779,6 +781,22 @@ void ABlasterCharacter::MulticastElim_Implementation()
 {
 	bElimmed = true;
 	PlayElimMontage();
+
+#pragma region Nullchecks
+	if (!DissolveMaterialInstance)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|DissolveMaterialInstance is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+#pragma endregion
+
+	DynamicDissolveMaterialInstance = UMaterialInstanceDynamic::Create(DissolveMaterialInstance, this);
+
+	GetMesh()->SetMaterial(0, DynamicDissolveMaterialInstance);
+	DynamicDissolveMaterialInstance->SetScalarParameterValue(TEXT("Dissolve"), 0.55f);
+	DynamicDissolveMaterialInstance->SetScalarParameterValue(TEXT("Glow"), 200.f);
+
+	StartDissolve();
 }
 
 void ABlasterCharacter::PlayElimMontage() const
@@ -814,4 +832,38 @@ void ABlasterCharacter::ElimTimerFinished()
 #pragma endregion
 
 	BlasterGameMode->RequestRespawn(this, Controller);
+}
+
+void ABlasterCharacter::UpdateDissolveMaterial(float DissolveValue)
+{
+#pragma region Nullchecks
+	if (!DynamicDissolveMaterialInstance)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|DynamicDissolveMaterialInstance is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+#pragma endregion
+
+	DynamicDissolveMaterialInstance->SetScalarParameterValue(TEXT("Dissolve"), DissolveValue);
+}
+
+void ABlasterCharacter::StartDissolve()
+{
+	DissolveTrack.BindDynamic(this, &ABlasterCharacter::UpdateDissolveMaterial);
+
+#pragma region Nullchecks
+	if (!DissolveCurve)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|DissolveCurve is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+	if (!DissolveTimeline)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|DissolveTimeline is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+#pragma endregion
+
+	DissolveTimeline->AddInterpFloat(DissolveCurve, DissolveTrack);
+	DissolveTimeline->Play();
 }

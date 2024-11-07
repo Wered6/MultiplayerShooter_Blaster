@@ -414,6 +414,19 @@ void ABlasterCharacter::FireButtonReleased()
 	Combat->FireButtonPressed(false);
 }
 
+void ABlasterCharacter::UpdateHUDHealth() const
+{
+#pragma region Nullchecks
+	if (!BlasterPlayerController)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|BlasterPlayerController is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+#pragma endregion
+
+	BlasterPlayerController->SetHUDHealth(Health, MaxHealth);
+}
+
 void ABlasterCharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
@@ -517,6 +530,32 @@ void ABlasterCharacter::PlayFireMontage(const bool bAiming) const
 	AnimInstance->Montage_JumpToSection(SectionName);
 }
 
+// Won't be called on server, because replication only works one way (server -> client)
+void ABlasterCharacter::OnRep_OverlappingWeapon(const AWeapon* LastWeapon) const
+{
+	if (OverlappingWeapon)
+	{
+		OverlappingWeapon->ShowPickupWidget(true);
+	}
+	if (LastWeapon)
+	{
+		LastWeapon->ShowPickupWidget(false);
+	}
+}
+
+void ABlasterCharacter::ServerEquip_Implementation()
+{
+#pragma region Nullchecks
+	if (!Combat)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|Combat is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+#pragma endregion
+
+	Combat->EquipWeapon(OverlappingWeapon);
+}
+
 void ABlasterCharacter::CalculateAO_Pitch()
 {
 	AO_Pitch = GetBaseAimRotation().Pitch;
@@ -527,6 +566,14 @@ void ABlasterCharacter::CalculateAO_Pitch()
 		const FVector2D OutRange(-90.f, 0.f);
 		AO_Pitch = FMath::GetMappedRangeValueClamped(InRange, OutRange, AO_Pitch);
 	}
+}
+
+void ABlasterCharacter::OnRep_ReplicatedMovement()
+{
+	Super::OnRep_ReplicatedMovement();
+
+	SimProxiesTurn();
+	TimeSinceLastMovementReplication = 0.f;
 }
 
 void ABlasterCharacter::AimOffset(float DeltaTime)
@@ -562,97 +609,6 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 	}
 
 	CalculateAO_Pitch();
-}
-
-// Won't be called on server, because replication only works one way (server -> client)
-void ABlasterCharacter::OnRep_OverlappingWeapon(const AWeapon* LastWeapon) const
-{
-	if (OverlappingWeapon)
-	{
-		OverlappingWeapon->ShowPickupWidget(true);
-	}
-	if (LastWeapon)
-	{
-		LastWeapon->ShowPickupWidget(false);
-	}
-}
-
-void ABlasterCharacter::ServerEquip_Implementation()
-{
-#pragma region Nullchecks
-	if (!Combat)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("%s|Combat is nullptr"), *FString(__FUNCTION__))
-		return;
-	}
-#pragma endregion
-
-	Combat->EquipWeapon(OverlappingWeapon);
-}
-
-void ABlasterCharacter::TurnInPlace(float DeltaTime)
-{
-	if (AO_Yaw > 90.f)
-	{
-		TurningInPlace = ETurningInPlace::ETIP_Right;
-	}
-	else if (AO_Yaw < -90.f)
-	{
-		TurningInPlace = ETurningInPlace::ETIP_Left;
-	}
-	if (TurningInPlace != ETurningInPlace::ETIP_NotTurning)
-	{
-		InterpAO_Yaw = FMath::FInterpTo(InterpAO_Yaw, 0.f, DeltaTime, 4.f);
-		AO_Yaw = InterpAO_Yaw;
-		if (FMath::Abs(AO_Yaw) < 15.f)
-		{
-			TurningInPlace = ETurningInPlace::ETIP_NotTurning;
-			StartingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
-		}
-	}
-}
-
-void ABlasterCharacter::OnRep_ReplicatedMovement()
-{
-	Super::OnRep_ReplicatedMovement();
-
-	SimProxiesTurn();
-	TimeSinceLastMovementReplication = 0.f;
-}
-
-void ABlasterCharacter::PlayHitReactMontage() const
-{
-#pragma region Nullchecks
-	if (!Combat)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("%s|Combat is nullptr"), *FString(__FUNCTION__))
-		return;
-	}
-	if (!HitReactMontage)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("%s|FireWeaponMontage is nullptr"), *FString(__FUNCTION__))
-		return;
-	}
-#pragma endregion
-
-	if (!Combat->EquippedWeapon)
-	{
-		return;
-	}
-
-	UAnimInstance* AnimInstance{GetMesh()->GetAnimInstance()};
-
-#pragma region Nullchecks
-	if (!AnimInstance)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("%s|AnimInstance is nullptr"), *FString(__FUNCTION__))
-		return;
-	}
-#pragma endregion
-
-	AnimInstance->Montage_Play(HitReactMontage);
-	const FName SectionName("FromFront");
-	AnimInstance->Montage_JumpToSection(SectionName);
 }
 
 void ABlasterCharacter::SimProxiesTurn()
@@ -702,6 +658,71 @@ void ABlasterCharacter::SimProxiesTurn()
 	TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 }
 
+void ABlasterCharacter::TurnInPlace(float DeltaTime)
+{
+	if (AO_Yaw > 90.f)
+	{
+		TurningInPlace = ETurningInPlace::ETIP_Right;
+	}
+	else if (AO_Yaw < -90.f)
+	{
+		TurningInPlace = ETurningInPlace::ETIP_Left;
+	}
+	if (TurningInPlace != ETurningInPlace::ETIP_NotTurning)
+	{
+		InterpAO_Yaw = FMath::FInterpTo(InterpAO_Yaw, 0.f, DeltaTime, 4.f);
+		AO_Yaw = InterpAO_Yaw;
+		if (FMath::Abs(AO_Yaw) < 15.f)
+		{
+			TurningInPlace = ETurningInPlace::ETIP_NotTurning;
+			StartingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
+		}
+	}
+}
+
+float ABlasterCharacter::CalculateSpeed() const
+{
+	FVector Velocity = GetVelocity();
+	Velocity.Z = 0.f;
+
+	return Velocity.Size();
+}
+
+void ABlasterCharacter::PlayHitReactMontage() const
+{
+#pragma region Nullchecks
+	if (!Combat)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|Combat is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+	if (!HitReactMontage)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|FireWeaponMontage is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+#pragma endregion
+
+	if (!Combat->EquippedWeapon)
+	{
+		return;
+	}
+
+	UAnimInstance* AnimInstance{GetMesh()->GetAnimInstance()};
+
+#pragma region Nullchecks
+	if (!AnimInstance)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|AnimInstance is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+#pragma endregion
+
+	AnimInstance->Montage_Play(HitReactMontage);
+	const FName SectionName("FromFront");
+	AnimInstance->Montage_JumpToSection(SectionName);
+}
+
 void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser)
 {
 	Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
@@ -731,27 +752,6 @@ void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const 
 
 		BlasterGameMode->PlayerEliminated(this, BlasterPlayerController, AttackerController);
 	}
-}
-
-void ABlasterCharacter::UpdateHUDHealth() const
-{
-#pragma region Nullchecks
-	if (!BlasterPlayerController)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("%s|BlasterPlayerController is nullptr"), *FString(__FUNCTION__))
-		return;
-	}
-#pragma endregion
-
-	BlasterPlayerController->SetHUDHealth(Health, MaxHealth);
-}
-
-float ABlasterCharacter::CalculateSpeed() const
-{
-	FVector Velocity = GetVelocity();
-	Velocity.Z = 0.f;
-
-	return Velocity.Size();
 }
 
 void ABlasterCharacter::OnRep_Health() const

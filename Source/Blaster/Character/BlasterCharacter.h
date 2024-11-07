@@ -129,6 +129,8 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void ShowPlayerName();
 
+	void UpdateHUDHealth() const;
+
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess="true"), Category=HUD)
 	TObjectPtr<UWidgetComponent> OverheadWidget;
@@ -157,6 +159,26 @@ public:
 	bool IsAiming() const;
 	AWeapon* GetEquippedWeapon() const;
 
+	void PlayFireMontage(const bool bAiming) const;
+
+private:
+	UFUNCTION()
+	void OnRep_OverlappingWeapon(const AWeapon* LastWeapon) const;
+
+	UFUNCTION(Server, Reliable)
+	void ServerEquip();
+
+	UPROPERTY(ReplicatedUsing=OnRep_OverlappingWeapon)
+	TObjectPtr<AWeapon> OverlappingWeapon;
+
+	UPROPERTY(EditAnywhere, Category=Combat)
+	TObjectPtr<UAnimMontage> FireWeaponMontage;
+
+#pragma endregion
+
+#pragma region MovementRotation
+
+public:
 	FORCEINLINE float GetAO_Yaw() const
 	{
 		return AO_Yaw;
@@ -172,36 +194,8 @@ public:
 		return TurningInPlace;
 	}
 
-	void PlayFireMontage(const bool bAiming) const;
 	void CalculateAO_Pitch();
 
-protected:
-	void AimOffset(float DeltaTime);
-
-private:
-	UFUNCTION()
-	void OnRep_OverlappingWeapon(const AWeapon* LastWeapon) const;
-
-	UFUNCTION(Server, Reliable)
-	void ServerEquip();
-	void TurnInPlace(float DeltaTime);
-
-	UPROPERTY(ReplicatedUsing=OnRep_OverlappingWeapon)
-	TObjectPtr<AWeapon> OverlappingWeapon;
-
-	float AO_Yaw;
-	float InterpAO_Yaw;
-	float AO_Pitch;
-	FRotator StartingAimRotation;
-
-	ETurningInPlace TurningInPlace;
-
-	UPROPERTY(EditAnywhere, Category=Combat)
-	TObjectPtr<UAnimMontage> FireWeaponMontage;
-
-#pragma endregion
-
-public:
 	FORCEINLINE bool ShouldRotateRootBone() const
 	{
 		return bRotateRootBone;
@@ -210,20 +204,21 @@ public:
 	virtual void OnRep_ReplicatedMovement() override;
 
 protected:
-	void PlayHitReactMontage() const;
+	void AimOffset(float DeltaTime);
 
 	void SimProxiesTurn();
 
-	UFUNCTION()
-	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser);
-
-	void UpdateHUDHealth() const;
-
 private:
+	void TurnInPlace(float DeltaTime);
+
 	float CalculateSpeed() const;
 
-	UPROPERTY(EditAnywhere, Category=Combat)
-	TObjectPtr<UAnimMontage> HitReactMontage;
+	float AO_Yaw;
+	float InterpAO_Yaw;
+	float AO_Pitch;
+	FRotator StartingAimRotation;
+
+	ETurningInPlace TurningInPlace;
 
 	bool bRotateRootBone{};
 	float TurnThreshold{0.5f};
@@ -231,6 +226,22 @@ private:
 	FRotator ProxyRotation{};
 	float ProxyYaw{};
 	float TimeSinceLastMovementReplication{};
+
+#pragma endregion
+
+#pragma region Damage
+
+protected:
+	void PlayHitReactMontage() const;
+
+	UFUNCTION()
+	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser);
+
+private:
+	UPROPERTY(EditAnywhere, Category=Combat)
+	TObjectPtr<UAnimMontage> HitReactMontage;
+
+#pragma endregion
 
 #pragma region PlayerStats
 

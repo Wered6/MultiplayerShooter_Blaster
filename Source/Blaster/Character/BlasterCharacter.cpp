@@ -767,6 +767,19 @@ void ABlasterCharacter::OnRep_Health() const
 
 void ABlasterCharacter::Elim()
 {
+#pragma region Nullchecks
+	if (!Combat)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|Combat is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+#pragma endregion
+
+	if (Combat->EquippedWeapon)
+	{
+		Combat->EquippedWeapon->Dropped();
+	}
+
 	MulticastElim();
 
 	GetWorldTimerManager().SetTimer(
@@ -790,13 +803,24 @@ void ABlasterCharacter::MulticastElim_Implementation()
 	}
 #pragma endregion
 
+	// Start dissolve effect
 	DynamicDissolveMaterialInstance = UMaterialInstanceDynamic::Create(DissolveMaterialInstance, this);
-
 	GetMesh()->SetMaterial(0, DynamicDissolveMaterialInstance);
 	DynamicDissolveMaterialInstance->SetScalarParameterValue(TEXT("Dissolve"), 0.55f);
 	DynamicDissolveMaterialInstance->SetScalarParameterValue(TEXT("Glow"), 200.f);
 
 	StartDissolve();
+
+	// Disable character movement
+	GetCharacterMovement()->DisableMovement();
+	GetCharacterMovement()->StopMovementImmediately();
+	if (BlasterPlayerController)
+	{
+		DisableInput(BlasterPlayerController);
+	}
+	// Disable collision
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void ABlasterCharacter::PlayElimMontage() const

@@ -169,6 +169,18 @@ void UCombatComponent::OnRep_EquippedWeapon() const
 
 	if (EquippedWeapon)
 	{
+		EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+		const USkeletalMeshSocket* HandSocket{Character->GetMesh()->GetSocketByName(FName("RightHandSocket"))};
+
+#pragma region Nullchecks
+		if (!HandSocket)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("%s|HandSocket is nullptr"), *FString(__FUNCTION__))
+			return;
+		}
+#pragma endregion
+
+		HandSocket->AttachActor(EquippedWeapon, Character->GetMesh());
 		Character->GetCharacterMovement()->bOrientRotationToMovement = false;
 		Character->bUseControllerRotationYaw = true;
 	}
@@ -280,14 +292,29 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 {
 #pragma region Nullchecks
-	if (!HUD)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("%s|HUD is nullptr"), *FString(__FUNCTION__))
-		return;
-	}
+	// Added because sometimes HUD didn't set in BeginPlay
 	if (!Character)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("%s|Character is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+	if (!IsValid(Controller))
+	{
+		Controller = Cast<ABlasterPlayerController>(Character->Controller);
+	}
+	if (!Controller)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|Controller is nullptr"), *FString(__FUNCTION__))
+		return;
+	}
+	if (!IsValid(HUD))
+	{
+		HUD = Cast<ABlasterHUD>(Controller->GetHUD());
+	}
+	//
+	if (!HUD)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s|HUD is nullptr"), *FString(__FUNCTION__))
 		return;
 	}
 #pragma endregion

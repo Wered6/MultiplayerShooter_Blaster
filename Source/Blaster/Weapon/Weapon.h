@@ -63,6 +63,8 @@ public:
 		return ZoomInterpSpeed;
 	}
 
+	void Dropped();
+
 	/*
 	* Textures fot the weapon crosshairs
 	*/
